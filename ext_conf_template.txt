@@ -1,0 +1,2 @@
+# cat=basic/enable; type=boolean; label= Show hint, if config is faulty
+showFaultyConfigHelp = 1

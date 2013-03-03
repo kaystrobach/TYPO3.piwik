@@ -1,0 +1,20 @@
+config.tx_piwik {
+  	############################################################################
+	# location of piwik
+	  	piwik_host       = {$config.tx_piwik.piwik_host}
+  	############################################################################
+	# idsite inside piwik
+		piwik_idsite     = {$config.tx_piwik.piwik_idsite}
+	############################################################################
+	# track beusers or not
+		trackBackendUsers = {$config.tx_piwik.trackBackendUsers}
+}
+
+page.footerData {
+  854536=COA
+  854536 {
+    20 = USER
+    20.userFunc    = tx_Piwik_UserFunc_Footer->contentPostProc_output
+    20.includeLibs = EXT:piwik/Classes/UserFunc/Footer.php
+  }
+}
