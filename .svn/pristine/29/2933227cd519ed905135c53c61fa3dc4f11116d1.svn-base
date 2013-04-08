@@ -1,8 +1,0 @@
-config.tx_piwik {
-	# cat=plugin.tx_piwik; type=input; label= path to piwik
-		piwik_host        = typo3conf/piwik/piwik/
-	# cat=plugin.tx_piwik; type=input; label= idsite inside piwik
-		piwik_idsite      = 1
-	# cat=plugin.tx_piwik; type=boolean; label= track be users or not
-		trackBackendUsers = 0
-}
