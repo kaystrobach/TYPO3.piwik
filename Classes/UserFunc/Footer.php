@@ -35,6 +35,13 @@ class tx_Piwik_UserFunc_Footer {
 	var $cObj;
 	private $tc = array();
 	/**
+	 * Piwik PHP Tracking Code for generating the tracking image
+	 *
+	 * @var Tx_Piwik_PiwikApi_PiwikTracker
+	 */
+	protected $piwikTracker;
+
+	/**
 	 * write piwik javascript right before </body> tag
 	 * JS Documentation on http://piwik.org/docs/javascript-tracking/	 
 	 * 
@@ -70,7 +77,9 @@ class tx_Piwik_UserFunc_Footer {
 		
 		//make options accessable in the whole class
 		$this->piwikOptions = $conf;
-		
+
+		$this->initializePiwikTracker();
+
 		//build trackingCode
 		$trackingCode .= $this->getPiwikEnableLinkTracking();
 		$trackingCode .= $this->getPiwikDomains();
@@ -90,7 +99,13 @@ class tx_Piwik_UserFunc_Footer {
 		$template = str_replace('###HOST###'          ,$conf['piwik_host']  ,$template);
 		$template = str_replace('###IDSITE###'        ,$conf['piwik_idsite'],$template);
 		$template = str_replace('###BEUSER###'        ,$beUserLogin         ,$template);
-		
+
+		if (strlen($this->piwikOptions['trackGoal'])) {
+			$template = str_replace('###TRACKING_IMAGE_URL###', $this->piwikTracker->getUrlTrackGoal($this->piwikOptions['trackGoal']), $template);
+		} else {
+			$template = str_replace('###TRACKING_IMAGE_URL###', $this->piwikTracker->getUrlTrackPageView(), $template);
+		}
+
 		//add complete piwikcode to frontend
 		#$params['pObj']->content = str_replace('</body>', $template.'</body>', $content);
 		return $template; 
@@ -117,20 +132,38 @@ class tx_Piwik_UserFunc_Footer {
 	}
 
 	/**
-	 * Generates piwikTracker.setDocumentTitle javascript code
+	 * Returns the name of the current action (e.g. the current page
+	 * title) or an empty string if no title was configured
 	 *
-	 * @return	string		piwikTracker.setDocumentTitle javascript code
+	 * @return string the current action name
 	 */
 	function getPiwikActionName() {
+
 		if ((strtoupper($this->piwikOptions['actionName']) == 'TYPO3') && !($this->piwikOptions['actionName.'])) {
-			return 'piwikTracker.setDocumentTitle("'.$GLOBALS['TSFE']->cObj->data['title'].'");'."\n";
+			return $GLOBALS['TSFE']->cObj->data['title'];
 		}
 
 		if (strlen($this->piwikOptions['actionName'])) {
 			$cObject = t3lib_div::makeInstance('tslib_cObj');
 			$actionName = $cObject->stdWrap($this->piwikOptions['actionName'], $this->piwikOptions['actionName.']);
-			return 'piwikTracker.setDocumentTitle("'.$actionName.'");'."\n";
+			return $actionName;
 		}
+
+		return '';
+	}
+
+	/**
+	 * Generates piwikTracker.setDocumentTitle javascript code
+	 *
+	 * @return string piwikTracker.setDocumentTitle javascript code
+	 */
+	function getDocumentTitleJS() {
+		$action = $this->getPiwikActionName();
+
+		if (strlen($action)) {
+			return 'piwikTracker.setDocumentTitle("' . $action . '");'."\n";
+		}
+
 		return '';
 	}
 
@@ -255,6 +288,25 @@ class tx_Piwik_UserFunc_Footer {
 			$scheme = 'http://';
 		}
 		return $scheme.$this->piwikOptions['piwik_host'];
+	}
+
+	/**
+	 * Creates a new instance of the piwik tracker and
+	 * initializes some variables by using the TYPO3 API
+	 *
+	 * @return void
+	 */
+	protected function initializePiwikTracker() {
+		$this->piwikTracker = t3lib_div::makeInstance(
+			'Tx_Piwik_PiwikApi_PiwikTracker',
+			$this->getPiwikIDSite(),
+			$this->piwikOptions['piwik_host']
+		);
+		$this->piwikTracker->setUrlReferrer(t3lib_div::getIndpEnv('HTTP_REFERER'));
+		$this->piwikTracker->setUrl(t3lib_div::getIndpEnv('TYPO3_REQUEST_URL'));
+		$this->piwikTracker->setIp(t3lib_div::getIndpEnv('REMOTE_ADDR'));
+		$this->piwikTracker->setBrowserLanguage(t3lib_div::getIndpEnv('HTTP_ACCEPT_LANGUAGE'));
+		$this->piwikTracker->setUserAgent(t3lib_div::getIndpEnv('HTTP_USER_AGENT'));
 	}
 
 }
