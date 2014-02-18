@@ -32,8 +32,9 @@
  * @author  Kay Strobach <typo3@kay-strobach.de> 
  */
 class tx_Piwik_UserFunc_Footer {
+
 	var $cObj;
-	private $tc = array();
+
 	/**
 	 * Piwik PHP Tracking Code for generating the tracking image
 	 *
@@ -42,20 +43,27 @@ class tx_Piwik_UserFunc_Footer {
 	protected $piwikTracker;
 
 	/**
+	 * The merged configuration from config.tx_piwik and the local
+	 * configuration of the USER object.
+	 *
+	 * @var array
+	 */
+	protected $piwikOptions = array();
+	/**
 	 * write piwik javascript right before </body> tag
 	 * JS Documentation on http://piwik.org/docs/javascript-tracking/	 
 	 * 
 	 * Idea piwikTracker.setDownloadClasses( "download" ); should be set to the default download class of TYPO3
-	 * Idea Track TYPO3 404 Errors ... http://piwik.org/faq/how-to/#faq_60	 
-	 *	 	 	 
+	 * Idea Track TYPO3 404 Errors ... http://piwik.org/faq/how-to/#faq_60
 	 *
-	 * @param	array		$$params: has the typoscript params
-	 * @param	reference   $reference: 
-	 * @return	nil		...
+	 * @param string $trackingCode The current content, normally empty.
+	 * @param array $localConfig The configuration that is passed to the USER object.
+	 * @return string
 	 */
-	function contentPostProc_output($content, $conf){
+	function contentPostProc_output($trackingCode, $localConfig){
 		// process the page with these options
-		$conf		 = $GLOBALS['TSFE']->tmpl->setup['config.']['tx_piwik.'];
+		$conf = $GLOBALS['TSFE']->tmpl->setup['config.']['tx_piwik.'];
+		$conf = t3lib_div::array_merge_recursive_overrule($conf, $localConfig);
 		$beUserLogin = $GLOBALS['TSFE']->beUserLogin;
 		
 		//check wether there is a BE User loggged in, if yes avoid to display the tracking code!
@@ -91,7 +99,7 @@ class tx_Piwik_UserFunc_Footer {
 		$trackingCode .= $this->getPiwikSetIgnoreClasses();
 		$trackingCode .= $this->getPiwikSetDownloadClasses();
 		$trackingCode .= $this->getPiwikSetLinkClasses();
-        $trackingCode .= "\t\t".'piwikTracker.trackPageView();';
+		$trackingCode .= "\t\t".'piwikTracker.trackPageView();';
 		
 		//replace placeholders
 		//currently the function $this->getPiwikHost() is not called, because of piwikintegration?!
