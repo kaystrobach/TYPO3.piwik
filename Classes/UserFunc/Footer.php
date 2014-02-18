@@ -99,6 +99,7 @@ class tx_Piwik_UserFunc_Footer {
 		$trackingCode .= $this->getPiwikSetIgnoreClasses();
 		$trackingCode .= $this->getPiwikSetDownloadClasses();
 		$trackingCode .= $this->getPiwikSetLinkClasses();
+		$trackingCode .= $this->getPiwikCustomVariables();
 		$trackingCode .= "\t\t".'piwikTracker.trackPageView();';
 		
 		//replace placeholders
@@ -273,6 +274,45 @@ class tx_Piwik_UserFunc_Footer {
 			return 'piwikTracker.setLinkClasses("'.$this->piwikOptions['setLinkClasses'].'");'."\n";
 		}
 		return '';
+	}
+
+	/**
+	 * Generates javascript code for using custom variables and
+	 * initializes custom variables in the piwikTracker API for image tracking.
+	 *
+	 * @return string piwikTracker javascript code for initializing custom variables
+	 */
+	function getPiwikCustomVariables() {
+
+		$javaScript = '';
+
+		if (!is_array($this->piwikOptions['customVariables.'])) {
+			return $javaScript;
+		}
+
+		/** @var tslib_cObj $cObject */
+		$cObject = t3lib_div::makeInstance('tslib_cObj');
+
+		$i = 1;
+
+		foreach ($this->piwikOptions['customVariables.'] as $var) {
+
+			$name = $cObject->stdWrap($var['name'], $var['name.']);
+			$value = $cObject->stdWrap($var['value'], $var['value.']);
+			$scope = $cObject->stdWrap($var['scope'], $var['scope.']);
+			$scope = $scope ? $scope : 'visit';
+
+			// The necessary javascript code.
+			$arguments = trim(json_encode(array($i, $name, $value, $scope)), "[]");
+			$javaScript .= 'piwikTracker.setCustomVariable(' . $arguments . ')' . "\n";
+
+			// For use in the noscript area.
+			$this->piwikTracker->setCustomVariable($i, $name, $value, $scope);
+
+			$i++;
+		}
+
+		return $javaScript;
 	}
 
 	/**
