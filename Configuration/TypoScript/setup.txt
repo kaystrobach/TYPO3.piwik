@@ -9,6 +9,9 @@ config.tx_piwik {
 	############################################################################
 	# track beusers or not
 		trackBackendUsers = {$config.tx_piwik.trackBackendUsers}
+	############################################################################
+	# if TRUE the asynchronous JavaScript API will be used
+		useAsyncTrackingApi = {$config.tx_piwik.useAsyncTrackingApi}
 }
 
 page.footerData {

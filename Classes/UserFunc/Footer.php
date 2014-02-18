@@ -49,6 +49,14 @@ class tx_Piwik_UserFunc_Footer {
 	 * @var array
 	 */
 	protected $piwikOptions = array();
+
+	/**
+	 * If TRUE the asynchronous JavaScript API will be used
+	 *
+	 * @var bool
+	 */
+	protected $useAsyncTrackingApi = FALSE;
+
 	/**
 	 * write piwik javascript right before </body> tag
 	 * JS Documentation on http://piwik.org/docs/javascript-tracking/	 
@@ -66,6 +74,10 @@ class tx_Piwik_UserFunc_Footer {
 		$conf = t3lib_div::array_merge_recursive_overrule($conf, $localConfig);
 		$beUserLogin = $GLOBALS['TSFE']->beUserLogin;
 		
+		if ($conf['useAsyncTrackingApi']) {
+			$this->useAsyncTrackingApi = TRUE;
+		}
+
 		//check wether there is a BE User loggged in, if yes avoid to display the tracking code!
 		//check wether needed parameters are set properly
 		if ((!$conf['piwik_idsite']) || (!$conf['piwik_host'])) {
@@ -80,7 +92,11 @@ class tx_Piwik_UserFunc_Footer {
 			$template = t3lib_div::getURL(t3lib_extMgm::extPath('piwik').'Resources/Private/Templates/Piwik/notracker_beuser.html');
 		}else {
 			//fetch the js template file, makes editing easier ;)
-			$template = t3lib_div::getURL(t3lib_extMgm::extPath('piwik').'Resources/Private/Templates/Piwik/tracker.html');
+			if ($this->useAsyncTrackingApi) {
+				$template = t3lib_div::getURL(t3lib_extMgm::extPath('piwik').'Resources/Private/Templates/Piwik/tracker_async.html');
+			} else {
+				$template = t3lib_div::getURL(t3lib_extMgm::extPath('piwik').'Resources/Private/Templates/Piwik/tracker.html');
+			}
 		}
 		
 		//make options accessable in the whole class
@@ -100,7 +116,10 @@ class tx_Piwik_UserFunc_Footer {
 		$trackingCode .= $this->getPiwikSetDownloadClasses();
 		$trackingCode .= $this->getPiwikSetLinkClasses();
 		$trackingCode .= $this->getPiwikCustomVariables();
-		$trackingCode .= "\t\t".'piwikTracker.trackPageView();';
+
+		if (!$this->useAsyncTrackingApi) {
+			$trackingCode .= "\t\t".'piwikTracker.trackPageView();';
+		}
 		
 		//replace placeholders
 		//currently the function $this->getPiwikHost() is not called, because of piwikintegration?!
@@ -137,7 +156,11 @@ class tx_Piwik_UserFunc_Footer {
 	 */
 	function getPiwikTrackGoal() {
 		if (strlen($this->piwikOptions['trackGoal'])) {
-			return 'piwikTracker.trackGoal('.$this->piwikOptions['trackGoal'].');'."\n";
+			if ($this->useAsyncTrackingApi) {
+				return '_paq.push(["trackGoal", ' . $this->piwikOptions['trackGoal'] . ']);' . "\n";
+			} else {
+				return 'piwikTracker.trackGoal(' . $this->piwikOptions['trackGoal'] . ');' . "\n";
+			}
 		}
 		return '';
 	}
@@ -172,7 +195,11 @@ class tx_Piwik_UserFunc_Footer {
 		$action = $this->getPiwikActionName();
 
 		if (strlen($action)) {
-			return 'piwikTracker.setDocumentTitle("' . $action . '");'."\n";
+			if ($this->useAsyncTrackingApi) {
+				return '_paq.push(["setDocumentTitle", "' . $action . '"]);' . "\n";
+			} else {
+				return 'piwikTracker.setDocumentTitle("' . $action . '");' . "\n";
+			}
 		}
 
 		return '';
@@ -185,7 +212,11 @@ class tx_Piwik_UserFunc_Footer {
 	 */
 	function getPiwikSetDownloadExtensions() {
 		if (strlen($this->piwikOptions['setDownloadExtensions'])) {
-			return 'piwikTracker.setDownloadExtensions( "'.$this->piwikOptions['setDownloadExtensions'].'" );'."\n";
+			if ($this->useAsyncTrackingApi) {
+				return '_paq.push(["setDownloadExtensions", "' . $this->piwikOptions['setDownloadExtensions'] . '"]);' . "\n";
+			} else {
+				return 'piwikTracker.setDownloadExtensions( "' . $this->piwikOptions['setDownloadExtensions'] . '" );' . "\n";
+			}
 		}
 		return '';
 	}
@@ -197,7 +228,11 @@ class tx_Piwik_UserFunc_Footer {
 	 */
 	function getPiwikAddDownloadExtensions() {
 		if (strlen($this->piwikOptions['addDownloadExtensions'])) {
-			return 'piwikTracker.addDownloadExtensions( "'.$this->piwikOptions['addDownloadExtensions'].'" );'."\n";
+			if ($this->useAsyncTrackingApi) {
+				return '_paq.push(["addDownloadExtensions", "' . $this->piwikOptions['addDownloadExtensions'] . '"]);' . "\n";
+			} else {
+				return 'piwikTracker.addDownloadExtensions( "' . $this->piwikOptions['addDownloadExtensions'] . '" );' . "\n";
+			}
 		}
 		return '';
 	}
@@ -213,7 +248,11 @@ class tx_Piwik_UserFunc_Footer {
 			for ($i=0; $i<count($hosts); $i++) {
 				$hosts[$i] = '"'.$hosts[$i].'"';
 			}
-			return 'piwikTracker.setDomains(['.implode(', ', $hosts).']);'."\n";
+			if ($this->useAsyncTrackingApi) {
+				return '_paq.push(["setDomains", [' . implode(', ', $hosts) . ']]);' . "\n";
+			} else {
+				return 'piwikTracker.setDomains([' . implode(', ', $hosts) . ']);' . "\n";
+			}
 		}
 		return '';
 	}
@@ -225,7 +264,11 @@ class tx_Piwik_UserFunc_Footer {
 	 */
 	function getLinkTrackingTimer() {
 		if (strlen($this->piwikOptions['setLinkTrackingTimer'])) {
-			return 'piwikTracker.setLinkTrackingTimer('.$this->piwikOptions['setLinkTrackingTimer'].');'."\n";
+			if ($this->useAsyncTrackingApi) {
+				return '_paq.push(["setLinkTrackingTimer", ' . $this->piwikOptions['setLinkTrackingTimer'] . ']);' . "\n";
+			} else {
+				return 'piwikTracker.setLinkTrackingTimer(' . $this->piwikOptions['setLinkTrackingTimer'] . ');' . "\n";
+			}
 		}
 		return '';
 	}
@@ -239,7 +282,12 @@ class tx_Piwik_UserFunc_Footer {
 		if ($this->piwikOptions['enableLinkTracking'] == '0') {
 			return '';
 		}
-		return 'piwikTracker.enableLinkTracking();'."\n";
+
+		if ($this->useAsyncTrackingApi) {
+			return '_paq.push(["enableLinkTracking"]);' . "\n";
+		} else {
+			return 'piwikTracker.enableLinkTracking();' . "\n";
+		}
 	}
 
 	/**
@@ -249,7 +297,11 @@ class tx_Piwik_UserFunc_Footer {
 	 */
 	function getPiwikSetIgnoreClasses() {
 		if (strlen($this->piwikOptions['setIgnoreClasses'])) {
-			return 'piwikTracker.setIgnoreClasses("'.$this->piwikOptions['setIgnoreClasses'].'");'."\n";
+			if ($this->useAsyncTrackingApi) {
+				return '_paq.push(["setIgnoreClasses", "' . $this->piwikOptions['setIgnoreClasses'] . '"]);' . "\n";
+			} else {
+				return 'piwikTracker.setIgnoreClasses("' . $this->piwikOptions['setIgnoreClasses'] . '");' . "\n";
+			}
 		}
 		return '';
 	}
@@ -261,7 +313,11 @@ class tx_Piwik_UserFunc_Footer {
 	 */
 	function getPiwikSetDownloadClasses() {
 		if (strlen($this->piwikOptions['setDownloadClasses'])) {
-			return 'piwikTracker.setDownloadClasses("'.$this->piwikOptions['setDownloadClasses'].'");'."\n";
+			if ($this->useAsyncTrackingApi) {
+				return '_paq.push(["setDownloadClasses", "' . $this->piwikOptions['setDownloadClasses'] . '"]);' . "\n";
+			} else {
+				return 'piwikTracker.setDownloadClasses("' . $this->piwikOptions['setDownloadClasses'] . '");' . "\n";
+			}
 		}
 		return '';
 	}
@@ -273,7 +329,11 @@ class tx_Piwik_UserFunc_Footer {
 	 */
 	function getPiwikSetLinkClasses() {
 		if (strlen($this->piwikOptions['setLinkClasses'])) {
-			return 'piwikTracker.setLinkClasses("'.$this->piwikOptions['setLinkClasses'].'");'."\n";
+			if ($this->useAsyncTrackingApi) {
+				return '_paq.push(["setLinkClasses", "' . $this->piwikOptions['setLinkClasses'] . '"]);' . "\n";
+			} else {
+				return 'piwikTracker.setLinkClasses("' . $this->piwikOptions['setLinkClasses'] . '");' . "\n";
+			}
 		}
 		return '';
 	}
