@@ -115,8 +115,10 @@ class tx_Piwik_UserFunc_Footer {
 			$template = str_replace('###TRACKING_IMAGE_URL###', $this->piwikTracker->getUrlTrackPageView(), $template);
 		}
 
-		//add complete piwikcode to frontend
-		#$params['pObj']->content = str_replace('</body>', $template.'</body>', $content);
+		if (isset($this->piwikOptions['includeJavaScript']) && !(bool)$this->piwikOptions['includeJavaScript']) {
+			$template = t3lib_parsehtml_proc::substituteSubpart($template, '###JAVASCRIPT_INCLUDE###', '');
+		}
+
 		return $template; 
 	}
 
