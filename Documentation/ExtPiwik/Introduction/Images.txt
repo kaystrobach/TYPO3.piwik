@@ -1,0 +1,7 @@
+﻿.. |img-1|      image:: ../Images/manual_html_7a0770c3.jpg
+   :height: 104
+   :width: 278
+.. :align: left
+.. :border: 0
+.. :name: Grafik1
+

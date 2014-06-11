@@ -1,0 +1,8 @@
+conf.py:
+  copyright: 2013-2014
+  project: Sphinx Python Documentation Generator and Viewer
+  version: 2.1
+  release: 2.1.0
+  html_theme_options:
+    github_repository: kaystrobach/TYPO3.piwik
+    github_branch: master
