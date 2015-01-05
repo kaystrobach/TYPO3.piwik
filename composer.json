@@ -1,0 +1,6 @@
+{
+	"name": "intera-typo3-extension/piwik",
+	"description": "Adds Piwik JS-Code (http://piwik.org/) to your pages",
+	"type": "typo3-cms-extension",
+	"version": "3.0.1"
+}

@@ -5,4 +5,6 @@ config.tx_piwik {
 		piwik_idsite      = 1
 	# cat=plugin.tx_piwik; type=boolean; label= track be users or not
 		trackBackendUsers = 0
+	# cat=plugin.tx_piwik; type=boolean; label= Use asynchronous API: If TRUE the asynchronous JavaScript API of Piwik will be used
+		useAsyncTrackingApi = 0
 }

@@ -1,3 +1,4 @@
+
 config.tx_piwik {
   	############################################################################
 	# location of piwik
@@ -8,12 +9,15 @@ config.tx_piwik {
 	############################################################################
 	# track beusers or not
 		trackBackendUsers = {$config.tx_piwik.trackBackendUsers}
+	############################################################################
+	# if TRUE the asynchronous JavaScript API will be used
+		useAsyncTrackingApi = {$config.tx_piwik.useAsyncTrackingApi}
 }
 
 page.footerData {
   854536=COA
   854536 {
-    20 = USER
+    20 = USER_INT
     20.userFunc    = tx_Piwik_UserFunc_Footer->contentPostProc_output
     20.includeLibs = EXT:piwik/Classes/UserFunc/Footer.php
   }
