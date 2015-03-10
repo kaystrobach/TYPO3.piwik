@@ -366,7 +366,12 @@ class tx_Piwik_UserFunc_Footer {
 
 			// The necessary javascript code.
 			$arguments = trim(json_encode(array($i, $name, $value, $scope)), "[]");
-			$javaScript .= 'piwikTracker.setCustomVariable(' . $arguments . ')' . "\n";
+
+			if ($this->useAsyncTrackingApi) {
+				$javaScript .= '_paq.push(["setCustomVariable", ' . $arguments . ']);' . "\n";
+			} else {
+				$javaScript .= 'piwikTracker.setCustomVariable(' . $arguments . ');' . "\n";
+			}
 
 			// For use in the noscript area.
 			$this->piwikTracker->setCustomVariable($i, $name, $value, $scope);
