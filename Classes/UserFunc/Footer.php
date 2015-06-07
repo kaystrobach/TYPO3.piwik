@@ -129,9 +129,9 @@ class tx_Piwik_UserFunc_Footer {
 		$template = str_replace('###BEUSER###'        ,$beUserLogin         ,$template);
 
 		if (strlen($this->piwikOptions['trackGoal'])) {
-			$template = str_replace('###TRACKING_IMAGE_URL###', $this->piwikTracker->getUrlTrackGoal($this->piwikOptions['trackGoal']), $template);
+			$template = str_replace('###TRACKING_IMAGE_URL###', htmlentities($this->piwikTracker->getUrlTrackGoal($this->piwikOptions['trackGoal'])), $template);
 		} else {
-			$template = str_replace('###TRACKING_IMAGE_URL###', $this->piwikTracker->getUrlTrackPageView(), $template);
+			$template = str_replace('###TRACKING_IMAGE_URL###', htmlentities($this->piwikTracker->getUrlTrackPageView()), $template);
 		}
 
 		if (isset($this->piwikOptions['includeJavaScript']) && !(bool)$this->piwikOptions['includeJavaScript']) {
