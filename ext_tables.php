@@ -1,6 +1,5 @@
 <?php
 /*******************************************************************************
  * Static file
- */ 
-t3lib_extMgm::addStaticFile($_EXTKEY,'Configuration/TypoScript/', 'Piwik');
-?>
+ */
+\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addStaticFile($_EXTKEY, 'Configuration/TypoScript/', 'Piwik');

@@ -1,39 +1,41 @@
 <?php
 /***************************************************************
-*  Copyright notice
-*
-*  (c) 2010 	Kay Strobach (typo3@kay-strobach.de)
-*  (c) 2009 	Ulrich Wuensche (wuensche@drwuensche.de),
-*
-*  All rights reserved
-*
-*  This script is free software; you can redistribute it and/or modify
-*  it under the terms of the GNU General Public License as published by
-*  the Free Software Foundation; version 2 of the License.
-*
-*  The GNU General Public License can be found at
-*  http://www.gnu.org/copyleft/gpl.html.
-*
-*  This script is distributed in the hope that it will be useful,
-*  but WITHOUT ANY WARRANTY; without even the implied warranty of
-*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-*  GNU General Public License for more details.
-*
-*  This copyright notice MUST APPEAR in all copies of the script!
-***************************************************************/
+ *  Copyright notice
+ *
+ *  (c) 2010 Kay Strobach (typo3@kay-strobach.de)
+ *  (c) 2009 Ulrich Wuensche (wuensche@drwuensche.de),
+ *
+ *  All rights reserved
+ *
+ *  This script is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; version 2 of the License.
+ *
+ *  The GNU General Public License can be found at
+ *  http://www.gnu.org/copyleft/gpl.html.
+ *
+ *  This script is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  This copyright notice MUST APPEAR in all copies of the script!
+ ***************************************************************/
+
 /**
  * Based on B-Net1 Piwik plugin implementation, old piwik plugin and piwik2a
- * Provides Interface to get the new piwiktrackingcode 
- * 
+ * Provides Interface to get the new piwiktrackingcode
+ *
  * Hooks for the 'piwik' extension.
  *
- * @author	Ulrich Wuensche <wuensche@drwuensche.de>
- * @author	Joerg Winter <winter@b-net1.de>
- * @author  Kay Strobach <typo3@kay-strobach.de> 
+ * @author Ulrich Wuensche <wuensche@drwuensche.de>
+ * @author Joerg Winter <winter@b-net1.de>
+ * @author Kay Strobach <typo3@kay-strobach.de>
  */
 class tx_Piwik_UserFunc_Footer {
 
-	var $cObj;
+	/** @var \TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer */
+	public $cObj;
 
 	/**
 	 * Piwik PHP Tracking Code for generating the tracking image
@@ -59,8 +61,8 @@ class tx_Piwik_UserFunc_Footer {
 
 	/**
 	 * write piwik javascript right before </body> tag
-	 * JS Documentation on http://piwik.org/docs/javascript-tracking/	 
-	 * 
+	 * JS Documentation on http://piwik.org/docs/javascript-tracking/
+	 *
 	 * Idea piwikTracker.setDownloadClasses( "download" ); should be set to the default download class of TYPO3
 	 * Idea Track TYPO3 404 Errors ... http://piwik.org/faq/how-to/#faq_60
 	 *
@@ -68,12 +70,12 @@ class tx_Piwik_UserFunc_Footer {
 	 * @param array $localConfig The configuration that is passed to the USER object.
 	 * @return string
 	 */
-	function contentPostProc_output($trackingCode, $localConfig){
+	public function contentPostProc_output($trackingCode, $localConfig) {
 		// process the page with these options
 		$conf = $GLOBALS['TSFE']->tmpl->setup['config.']['tx_piwik.'];
-		$conf = t3lib_div::array_merge_recursive_overrule($conf, $localConfig);
+		\TYPO3\CMS\Core\Utility\ArrayUtility::mergeRecursiveWithOverrule($conf, $localConfig);
 		$beUserLogin = $GLOBALS['TSFE']->beUserLogin;
-		
+
 		if ($conf['useAsyncTrackingApi']) {
 			$this->useAsyncTrackingApi = TRUE;
 		}
@@ -83,22 +85,22 @@ class tx_Piwik_UserFunc_Footer {
 		if ((!$conf['piwik_idsite']) || (!$conf['piwik_host'])) {
 			//fetch the js template file, makes editing easier ;)
 			$extConf = unserialize($GLOBALS['$TYPO3_CONF_VARS']['EXT']['extConf']['piwik']);
-			if($extConf['showFaultyConfigHelp']) {
-				$template = t3lib_div::getURL(t3lib_extMgm::extPath('piwik').'Resources/Private/Templates/Piwik/notracker.html');
+			if ($extConf['showFaultyConfigHelp']) {
+				$template = \TYPO3\CMS\Core\Utility\GeneralUtility::getURL(\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::extPath('piwik') . 'Resources/Private/Templates/Piwik/notracker.html');
 			} else {
 				return '';
 			}
 		} elseif (($beUserLogin == 1) && (!intval($conf['trackBackendUsers']))) {
-			$template = t3lib_div::getURL(t3lib_extMgm::extPath('piwik').'Resources/Private/Templates/Piwik/notracker_beuser.html');
-		}else {
+			$template = \TYPO3\CMS\Core\Utility\GeneralUtility::getURL(\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::extPath('piwik') . 'Resources/Private/Templates/Piwik/notracker_beuser.html');
+		} else {
 			//fetch the js template file, makes editing easier ;)
 			if ($this->useAsyncTrackingApi) {
-				$template = t3lib_div::getURL(t3lib_extMgm::extPath('piwik').'Resources/Private/Templates/Piwik/tracker_async.html');
+				$template = \TYPO3\CMS\Core\Utility\GeneralUtility::getURL(\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::extPath('piwik') . 'Resources/Private/Templates/Piwik/tracker_async.html');
 			} else {
-				$template = t3lib_div::getURL(t3lib_extMgm::extPath('piwik').'Resources/Private/Templates/Piwik/tracker.html');
+				$template = \TYPO3\CMS\Core\Utility\GeneralUtility::getURL(\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::extPath('piwik') . 'Resources/Private/Templates/Piwik/tracker.html');
 			}
 		}
-		
+
 		//make options accessable in the whole class
 		$this->piwikOptions = $conf;
 
@@ -118,15 +120,15 @@ class tx_Piwik_UserFunc_Footer {
 		$trackingCode .= $this->getPiwikCustomVariables();
 
 		if (!$this->useAsyncTrackingApi) {
-			$trackingCode .= "\t\t".'piwikTracker.trackPageView();';
+			$trackingCode .= "\t\t" . 'piwikTracker.trackPageView();';
 		}
-		
+
 		//replace placeholders
 		//currently the function $this->getPiwikHost() is not called, because of piwikintegration?!
-		$template = str_replace('###TRACKEROPTIONS###',$trackingCode        ,$template);
-		$template = str_replace('###HOST###'          ,$conf['piwik_host']  ,$template);
-		$template = str_replace('###IDSITE###'        ,$conf['piwik_idsite'],$template);
-		$template = str_replace('###BEUSER###'        ,$beUserLogin         ,$template);
+		$template = str_replace('###TRACKEROPTIONS###', $trackingCode, $template);
+		$template = str_replace('###HOST###', $conf['piwik_host'], $template);
+		$template = str_replace('###IDSITE###', $conf['piwik_idsite'], $template);
+		$template = str_replace('###BEUSER###', $beUserLogin, $template);
 
 		if (strlen($this->piwikOptions['trackGoal'])) {
 			$template = str_replace('###TRACKING_IMAGE_URL###', htmlentities($this->piwikTracker->getUrlTrackGoal($this->piwikOptions['trackGoal'])), $template);
@@ -135,31 +137,32 @@ class tx_Piwik_UserFunc_Footer {
 		}
 
 		if (isset($this->piwikOptions['includeJavaScript']) && !(bool)$this->piwikOptions['includeJavaScript']) {
-			$template = t3lib_parsehtml_proc::substituteSubpart($template, '###JAVASCRIPT_INCLUDE###', '');
+			$template = \TYPO3\CMS\Core\Html\RteHtmlParser::substituteSubpart($template, '###JAVASCRIPT_INCLUDE###', '');
 		}
 
-		return $template; 
+		return $template;
 	}
 
 	/**
 	 * a stub for backwards compatibility with extending classes that might use it
 	 *
-	 * @return	bool		always false
+	 * @return bool  always false
 	 */
 	function is_backend() {
 		return false;
 	}
-		/**
+
+	/**
 	 * Generates piwikTracker.trackGoal javascript code
 	 *
-	 * @return	string		piwikTracker.trackGoal javascript code
+	 * @return string  piwikTracker.trackGoal javascript code
 	 */
-	function getPiwikTrackGoal() {
+	protected function getPiwikTrackGoal() {
 		if (strlen($this->piwikOptions['trackGoal'])) {
 			if ($this->useAsyncTrackingApi) {
-				return '_paq.push(["trackGoal", ' . $this->piwikOptions['trackGoal'] . ']);' . "\n";
+				return '_paq.push(["trackGoal", ' . $this->piwikOptions['trackGoal'] . ']);' . PHP_EOL;
 			} else {
-				return 'piwikTracker.trackGoal(' . $this->piwikOptions['trackGoal'] . ');' . "\n";
+				return 'piwikTracker.trackGoal(' . $this->piwikOptions['trackGoal'] . ');' . PHP_EOL;
 			}
 		}
 		return '';
@@ -171,14 +174,15 @@ class tx_Piwik_UserFunc_Footer {
 	 *
 	 * @return string the current action name
 	 */
-	function getPiwikActionName() {
+	protected function getPiwikActionName() {
 
 		if ((strtoupper($this->piwikOptions['actionName']) == 'TYPO3') && !($this->piwikOptions['actionName.'])) {
 			return $GLOBALS['TSFE']->cObj->data['title'];
 		}
 
 		if (strlen($this->piwikOptions['actionName'])) {
-			$cObject = t3lib_div::makeInstance('tslib_cObj');
+			/** @var \TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer $cObject */
+			$cObject = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\Frontend\\ContentObject\\ContentObjectRenderer');
 			$actionName = $cObject->stdWrap($this->piwikOptions['actionName'], $this->piwikOptions['actionName.']);
 			return $actionName;
 		}
@@ -196,9 +200,9 @@ class tx_Piwik_UserFunc_Footer {
 
 		if (strlen($action)) {
 			if ($this->useAsyncTrackingApi) {
-				return '_paq.push(["setDocumentTitle", "' . $action . '"]);' . "\n";
+				return '_paq.push(["setDocumentTitle", "' . $action . '"]);' . PHP_EOL;
 			} else {
-				return 'piwikTracker.setDocumentTitle("' . $action . '");' . "\n";
+				return 'piwikTracker.setDocumentTitle("' . $action . '");' . PHP_EOL;
 			}
 		}
 
@@ -208,14 +212,14 @@ class tx_Piwik_UserFunc_Footer {
 	/**
 	 * Generates piwikTracker.setDownloadExtensions javascript code
 	 *
-	 * @return	string		piwikTracker.setDownloadExtensions javascript code
+	 * @return string  piwikTracker.setDownloadExtensions javascript code
 	 */
-	function getPiwikSetDownloadExtensions() {
+	protected function getPiwikSetDownloadExtensions() {
 		if (strlen($this->piwikOptions['setDownloadExtensions'])) {
 			if ($this->useAsyncTrackingApi) {
-				return '_paq.push(["setDownloadExtensions", "' . $this->piwikOptions['setDownloadExtensions'] . '"]);' . "\n";
+				return '_paq.push(["setDownloadExtensions", "' . $this->piwikOptions['setDownloadExtensions'] . '"]);' . PHP_EOL;
 			} else {
-				return 'piwikTracker.setDownloadExtensions( "' . $this->piwikOptions['setDownloadExtensions'] . '" );' . "\n";
+				return 'piwikTracker.setDownloadExtensions( "' . $this->piwikOptions['setDownloadExtensions'] . '" );' . PHP_EOL;
 			}
 		}
 		return '';
@@ -224,14 +228,14 @@ class tx_Piwik_UserFunc_Footer {
 	/**
 	 * Generates piwikTracker.addDownloadExtensions javascript code
 	 *
-	 * @return	string		piwikTracker.addDownloadExtensions javascript code
+	 * @return string  piwikTracker.addDownloadExtensions javascript code
 	 */
-	function getPiwikAddDownloadExtensions() {
+	protected function getPiwikAddDownloadExtensions() {
 		if (strlen($this->piwikOptions['addDownloadExtensions'])) {
 			if ($this->useAsyncTrackingApi) {
-				return '_paq.push(["addDownloadExtensions", "' . $this->piwikOptions['addDownloadExtensions'] . '"]);' . "\n";
+				return '_paq.push(["addDownloadExtensions", "' . $this->piwikOptions['addDownloadExtensions'] . '"]);' . PHP_EOL;
 			} else {
-				return 'piwikTracker.addDownloadExtensions( "' . $this->piwikOptions['addDownloadExtensions'] . '" );' . "\n";
+				return 'piwikTracker.addDownloadExtensions( "' . $this->piwikOptions['addDownloadExtensions'] . '" );' . PHP_EOL;
 			}
 		}
 		return '';
@@ -240,18 +244,18 @@ class tx_Piwik_UserFunc_Footer {
 	/**
 	 * Generates piwikTracker.setDomains javascript code
 	 *
-	 * @return	string		piwikTracker.setDomains javascript code
+	 * @return string  piwikTracker.setDomains javascript code
 	 */
-	function getPiwikDomains() {
+	protected function getPiwikDomains() {
 		if (strlen($this->piwikOptions['setDomains'])) {
-			$hosts = t3lib_div::trimExplode(',', $this->piwikOptions['setDomains']);
-			for ($i=0; $i<count($hosts); $i++) {
-				$hosts[$i] = '"'.$hosts[$i].'"';
+			$hosts = \TYPO3\CMS\Core\Utility\GeneralUtility::trimExplode(',', $this->piwikOptions['setDomains']);
+			for ($i = 0; $i < count($hosts); $i++) {
+				$hosts[$i] = '"' . $hosts[$i] . '"';
 			}
 			if ($this->useAsyncTrackingApi) {
-				return '_paq.push(["setDomains", [' . implode(', ', $hosts) . ']]);' . "\n";
+				return '_paq.push(["setDomains", [' . implode(', ', $hosts) . ']]);' . PHP_EOL;
 			} else {
-				return 'piwikTracker.setDomains([' . implode(', ', $hosts) . ']);' . "\n";
+				return 'piwikTracker.setDomains([' . implode(', ', $hosts) . ']);' . PHP_EOL;
 			}
 		}
 		return '';
@@ -260,14 +264,14 @@ class tx_Piwik_UserFunc_Footer {
 	/**
 	 * Generates piwikTracker.setLinkTrackingTimer javascript code
 	 *
-	 * @return	string		piwikTracker.setLinkTrackingTimer javascript code
+	 * @return string  piwikTracker.setLinkTrackingTimer javascript code
 	 */
-	function getLinkTrackingTimer() {
+	protected function getLinkTrackingTimer() {
 		if (strlen($this->piwikOptions['setLinkTrackingTimer'])) {
 			if ($this->useAsyncTrackingApi) {
-				return '_paq.push(["setLinkTrackingTimer", ' . $this->piwikOptions['setLinkTrackingTimer'] . ']);' . "\n";
+				return '_paq.push(["setLinkTrackingTimer", ' . $this->piwikOptions['setLinkTrackingTimer'] . ']);' . PHP_EOL;
 			} else {
-				return 'piwikTracker.setLinkTrackingTimer(' . $this->piwikOptions['setLinkTrackingTimer'] . ');' . "\n";
+				return 'piwikTracker.setLinkTrackingTimer(' . $this->piwikOptions['setLinkTrackingTimer'] . ');' . PHP_EOL;
 			}
 		}
 		return '';
@@ -276,31 +280,31 @@ class tx_Piwik_UserFunc_Footer {
 	/**
 	 * Generates piwikTracker.enableLinkTracking javascript code
 	 *
-	 * @return	string		piwikTracker.enableLinkTracking javascript code
+	 * @return string  piwikTracker.enableLinkTracking javascript code
 	 */
-	function getPiwikEnableLinkTracking() {
+	protected function getPiwikEnableLinkTracking() {
 		if ($this->piwikOptions['enableLinkTracking'] == '0') {
 			return '';
 		}
 
 		if ($this->useAsyncTrackingApi) {
-			return '_paq.push(["enableLinkTracking"]);' . "\n";
+			return '_paq.push(["enableLinkTracking"]);' . PHP_EOL;
 		} else {
-			return 'piwikTracker.enableLinkTracking();' . "\n";
+			return 'piwikTracker.enableLinkTracking();' . PHP_EOL;
 		}
 	}
 
 	/**
 	 * Generates piwikTracker.setIgnoreClasses javascript code
 	 *
-	 * @return	string		piwikTracker.setIgnoreClasses javascript code
+	 * @return string  piwikTracker.setIgnoreClasses javascript code
 	 */
-	function getPiwikSetIgnoreClasses() {
+	protected function getPiwikSetIgnoreClasses() {
 		if (strlen($this->piwikOptions['setIgnoreClasses'])) {
 			if ($this->useAsyncTrackingApi) {
-				return '_paq.push(["setIgnoreClasses", "' . $this->piwikOptions['setIgnoreClasses'] . '"]);' . "\n";
+				return '_paq.push(["setIgnoreClasses", "' . $this->piwikOptions['setIgnoreClasses'] . '"]);' . PHP_EOL;
 			} else {
-				return 'piwikTracker.setIgnoreClasses("' . $this->piwikOptions['setIgnoreClasses'] . '");' . "\n";
+				return 'piwikTracker.setIgnoreClasses("' . $this->piwikOptions['setIgnoreClasses'] . '");' . PHP_EOL;
 			}
 		}
 		return '';
@@ -309,14 +313,14 @@ class tx_Piwik_UserFunc_Footer {
 	/**
 	 * Generates piwikTracker.setDownloadClasses javascript code
 	 *
-	 * @return	string		piwikTracker.setDownloadClasses javascript code
+	 * @return string  piwikTracker.setDownloadClasses javascript code
 	 */
-	function getPiwikSetDownloadClasses() {
+	protected function getPiwikSetDownloadClasses() {
 		if (strlen($this->piwikOptions['setDownloadClasses'])) {
 			if ($this->useAsyncTrackingApi) {
-				return '_paq.push(["setDownloadClasses", "' . $this->piwikOptions['setDownloadClasses'] . '"]);' . "\n";
+				return '_paq.push(["setDownloadClasses", "' . $this->piwikOptions['setDownloadClasses'] . '"]);' . PHP_EOL;
 			} else {
-				return 'piwikTracker.setDownloadClasses("' . $this->piwikOptions['setDownloadClasses'] . '");' . "\n";
+				return 'piwikTracker.setDownloadClasses("' . $this->piwikOptions['setDownloadClasses'] . '");' . PHP_EOL;
 			}
 		}
 		return '';
@@ -325,14 +329,14 @@ class tx_Piwik_UserFunc_Footer {
 	/**
 	 * Generates piwikTracker.setLinkClasses javascript code
 	 *
-	 * @return	string		piwikTracker.setLinkClasses javascript code
+	 * @return string  piwikTracker.setLinkClasses javascript code
 	 */
-	function getPiwikSetLinkClasses() {
+	protected function getPiwikSetLinkClasses() {
 		if (strlen($this->piwikOptions['setLinkClasses'])) {
 			if ($this->useAsyncTrackingApi) {
-				return '_paq.push(["setLinkClasses", "' . $this->piwikOptions['setLinkClasses'] . '"]);' . "\n";
+				return '_paq.push(["setLinkClasses", "' . $this->piwikOptions['setLinkClasses'] . '"]);' . PHP_EOL;
 			} else {
-				return 'piwikTracker.setLinkClasses("' . $this->piwikOptions['setLinkClasses'] . '");' . "\n";
+				return 'piwikTracker.setLinkClasses("' . $this->piwikOptions['setLinkClasses'] . '");' . PHP_EOL;
 			}
 		}
 		return '';
@@ -344,7 +348,7 @@ class tx_Piwik_UserFunc_Footer {
 	 *
 	 * @return string piwikTracker javascript code for initializing custom variables
 	 */
-	function getPiwikCustomVariables() {
+	protected function getPiwikCustomVariables() {
 
 		$javaScript = '';
 
@@ -352,8 +356,8 @@ class tx_Piwik_UserFunc_Footer {
 			return $javaScript;
 		}
 
-		/** @var tslib_cObj $cObject */
-		$cObject = t3lib_div::makeInstance('tslib_cObj');
+		/** @var \TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer $cObject */
+		$cObject = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\Frontend\\ContentObject\\ContentObjectRenderer');
 
 		$i = 1;
 
@@ -368,9 +372,9 @@ class tx_Piwik_UserFunc_Footer {
 			$arguments = trim(json_encode(array($i, $name, $value, $scope)), "[]");
 
 			if ($this->useAsyncTrackingApi) {
-				$javaScript .= '_paq.push(["setCustomVariable", ' . $arguments . ']);' . "\n";
+				$javaScript .= '_paq.push(["setCustomVariable", ' . $arguments . ']);' . PHP_EOL;
 			} else {
-				$javaScript .= 'piwikTracker.setCustomVariable(' . $arguments . ');' . "\n";
+				$javaScript .= 'piwikTracker.setCustomVariable(' . $arguments . ');' . PHP_EOL;
 			}
 
 			// For use in the noscript area.
@@ -385,24 +389,24 @@ class tx_Piwik_UserFunc_Footer {
 	/**
 	 * Gets Piwik SiteID
 	 *
-	 * @return	string		Piwik SiteID
+	 * @return string  Piwik SiteID
 	 */
-	function getPiwikIDSite() {
+	protected function getPiwikIDSite() {
 		return $this->piwikOptions['piwik_idsite'];
 	}
 
 	/**
 	 * Gets Piwik Host-URL
 	 *
-	 * @return	string		Piwik Host-URL
+	 * @return string  Piwik Host-URL
 	 */
 	function getPiwikHost() {
-		if (t3lib_div::getIndpEnv('TYPO3_SSL')) {
+		if (\TYPO3\CMS\Core\Utility\GeneralUtility::getIndpEnv('TYPO3_SSL')) {
 			$scheme = 'https://';
 		} else {
 			$scheme = 'http://';
 		}
-		return $scheme.$this->piwikOptions['piwik_host'];
+		return $scheme . $this->piwikOptions['piwik_host'];
 	}
 
 	/**
@@ -412,22 +416,20 @@ class tx_Piwik_UserFunc_Footer {
 	 * @return void
 	 */
 	protected function initializePiwikTracker() {
-		$this->piwikTracker = t3lib_div::makeInstance(
+		$this->piwikTracker = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(
 			'Tx_Piwik_PiwikApi_PiwikTracker',
 			$this->getPiwikIDSite(),
 			$this->piwikOptions['piwik_host']
 		);
-		$this->piwikTracker->setUrlReferrer(t3lib_div::getIndpEnv('HTTP_REFERER'));
-		$this->piwikTracker->setUrl(t3lib_div::getIndpEnv('TYPO3_REQUEST_URL'));
-		$this->piwikTracker->setIp(t3lib_div::getIndpEnv('REMOTE_ADDR'));
-		$this->piwikTracker->setBrowserLanguage(t3lib_div::getIndpEnv('HTTP_ACCEPT_LANGUAGE'));
-		$this->piwikTracker->setUserAgent(t3lib_div::getIndpEnv('HTTP_USER_AGENT'));
+		$this->piwikTracker->setUrlReferrer(\TYPO3\CMS\Core\Utility\GeneralUtility::getIndpEnv('HTTP_REFERER'));
+		$this->piwikTracker->setUrl(\TYPO3\CMS\Core\Utility\GeneralUtility::getIndpEnv('TYPO3_REQUEST_URL'));
+		$this->piwikTracker->setIp(\TYPO3\CMS\Core\Utility\GeneralUtility::getIndpEnv('REMOTE_ADDR'));
+		$this->piwikTracker->setBrowserLanguage(\TYPO3\CMS\Core\Utility\GeneralUtility::getIndpEnv('HTTP_ACCEPT_LANGUAGE'));
+		$this->piwikTracker->setUserAgent(\TYPO3\CMS\Core\Utility\GeneralUtility::getIndpEnv('HTTP_USER_AGENT'));
 	}
 
 }
 
-if (defined("TYPO3_MODE") && $TYPO3_CONF_VARS[TYPO3_MODE]["XCLASS"]["ext/piwik/class.tx_piwik.php"])	{
+if (defined("TYPO3_MODE") && $TYPO3_CONF_VARS[TYPO3_MODE]["XCLASS"]["ext/piwik/class.tx_piwik.php"]) {
 	include_once($TYPO3_CONF_VARS[TYPO3_MODE]["XCLASS"]["ext/piwik/class.tx_piwik.php"]);
 }
-
-?>
