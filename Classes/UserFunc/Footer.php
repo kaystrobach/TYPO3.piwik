@@ -112,7 +112,7 @@ class tx_Piwik_UserFunc_Footer {
 		$trackingCode .= $this->getLinkTrackingTimer();
 		$trackingCode .= $this->getPiwikSetDownloadExtensions();
 		$trackingCode .= $this->getPiwikAddDownloadExtensions();
-		$trackingCode .= $this->getPiwikActionName();
+		$trackingCode .= $this->getDocumentTitleJS();
 		$trackingCode .= $this->getPiwikTrackGoal();
 		$trackingCode .= $this->getPiwikSetIgnoreClasses();
 		$trackingCode .= $this->getPiwikSetDownloadClasses();
