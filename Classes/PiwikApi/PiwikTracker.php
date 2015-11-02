@@ -1245,7 +1245,13 @@ class Tx_Piwik_PiwikApi_PiwikTracker
         if (strpos(self::$URL, '/piwik.php') === false
             && strpos(self::$URL, '/proxy-piwik.php') === false
         ) {
-            self::$URL .= '/piwik.php';
+            $lastSlash = strrpos(self::$URL, '/');
+            if($lastSlash !== false && $lastSlash +1 == strlen(self::$URL)){
+                self::$URL .= 'piwik.php';
+            }else {
+                self::$URL .= '/piwik.php';
+            }
+
         }
         return self::$URL;
     }
