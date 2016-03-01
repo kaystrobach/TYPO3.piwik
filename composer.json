@@ -1,0 +1,34 @@
+{
+  "name": "kaystrobach/piwik",
+  "type": "typo3-cms-extension",
+  "description": "Easily add Piwik tracking code to your TYPO3 CMS Projects",
+  "keywords": [
+    "TYPO3",
+    "extension",
+    "news"
+  ],
+  "homepage": "http://www.kay-strobach.de",
+  "authors": [
+    {
+      "name": "Kay Strobach",
+      "role": "Developer",
+      "homepage": "http://www.kay-strobach.de"
+    }
+  ],
+  "license": [
+    "GPL-2.0+"
+  ],
+  "require": {
+    "typo3/cms-core": ">=6.2.99,<8.0"
+  },
+  "require-dev": {
+    "mikey179/vfsStream": "1.4.*@dev",
+    "phpunit/phpunit": "~4.8.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "KayStrobach\\Piwik\\": "Classes"
+    },
+    "classmap": ["Classes/PiwikApi/PiwikTracker.php", "Classes/UserFunc/Footer.php"]
+  }
+}
