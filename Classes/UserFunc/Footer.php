@@ -144,7 +144,8 @@ class Footer {
 		}
 
 		if (isset($this->piwikOptions['includeJavaScript']) && !(bool)$this->piwikOptions['includeJavaScript']) {
-			$template = \TYPO3\CMS\Core\Html\RteHtmlParser::substituteSubpart($template, '###JAVASCRIPT_INCLUDE###', '');
+			$templateService = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(MarkerBasedTemplateService::class);
+			$templateService->substituteSubpart($template, '###JAVASCRIPT_INCLUDE###', '');
 		}
 
 		return $template;
