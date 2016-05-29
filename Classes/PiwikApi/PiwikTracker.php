@@ -1,4 +1,6 @@
 <?php
+namespace KayStrobach\Piwik\PiwikApi;
+
 /**
  * Piwik - Open source web analytics
  *
@@ -97,7 +99,7 @@
  * @package PiwikTracker
  * @api
  */
-class Tx_Piwik_PiwikApi_PiwikTracker
+class PiwikTracker
 {
     /**
      * Piwik base URL, for example http://example.org/piwik/
@@ -281,14 +283,14 @@ class Tx_Piwik_PiwikApi_PiwikTracker
      * to the 'ref' first party cookie storing referral information.
      *
      * @param string $jsonEncoded JSON encoded array containing Attribution info
-     * @throws Exception
+     * @throws \Exception
      * @see function getAttributionInfo() in https://github.com/piwik/piwik/blob/master/js/piwik.js
      */
     public function setAttributionInfo($jsonEncoded)
     {
         $decoded = json_decode($jsonEncoded, $assoc = true);
         if (!is_array($decoded)) {
-            throw new Exception("setAttributionInfo() is expecting a JSON encoded string, $jsonEncoded given");
+            throw new \Exception("setAttributionInfo() is expecting a JSON encoded string, $jsonEncoded given");
         }
         $this->attributionInfo = $decoded;
     }
@@ -301,12 +303,12 @@ class Tx_Piwik_PiwikApi_PiwikTracker
      * @param string $name Custom variable name
      * @param string $value Custom variable value
      * @param string $scope Custom variable scope. Possible values: visit, page, event
-     * @throws Exception
+     * @throws \Exception
      */
     public function setCustomVariable($id, $name, $value, $scope = 'visit')
     {
         if (!is_int($id)) {
-            throw new Exception("Parameter id to setCustomVariable should be an integer");
+            throw new \Exception("Parameter id to setCustomVariable should be an integer");
         }
         if ($scope == 'page') {
             $this->pageCustomVar[$id] = array($name, $value);
@@ -315,7 +317,7 @@ class Tx_Piwik_PiwikApi_PiwikTracker
         } elseif ($scope == 'visit') {
             $this->visitorCustomVar[$id] = array($name, $value);
         } else {
-            throw new Exception("Invalid 'scope' parameter value");
+            throw new \Exception("Invalid 'scope' parameter value");
         }
     }
 
@@ -327,7 +329,7 @@ class Tx_Piwik_PiwikApi_PiwikTracker
      * @param int $id Custom Variable integer index to fetch from cookie. Should be a value from 1 to 5
      * @param string $scope Custom variable scope. Possible values: visit, page, event
      *
-     * @throws Exception
+     * @throws \Exception
      * @return mixed An array with this format: array( 0 => CustomVariableName, 1 => CustomVariableValue ) or false
      * @see Piwik.js getCustomVariable()
      */
@@ -338,14 +340,14 @@ class Tx_Piwik_PiwikApi_PiwikTracker
         } elseif ($scope == 'event') {
             return  isset($this->eventCustomVar[$id]) ? $this->eventCustomVar[$id] : false;
         } else if ($scope != 'visit') {
-            throw new Exception("Invalid 'scope' parameter value");
+            throw new \Exception("Invalid 'scope' parameter value");
         }
         if (!empty($this->visitorCustomVar[$id])) {
             return $this->visitorCustomVar[$id];
         }
         $cookieDecoded = $this->getCustomVariablesFromCookie();
         if (!is_int($id)) {
-            throw new Exception("Parameter to getCustomVariable should be an integer");
+            throw new \Exception("Parameter to getCustomVariable should be an integer");
         }
         if (!is_array($cookieDecoded)
             || !isset($cookieDecoded[$id])
@@ -496,7 +498,7 @@ class Tx_Piwik_PiwikApi_PiwikTracker
         }
         return $domain;
     }
-    
+
     /**
      * Get cookie name with prefix and domain hash
      */
@@ -589,12 +591,12 @@ class Tx_Piwik_PiwikApi_PiwikTracker
      * @param string|array $category (optional) Product category, or array of product categories (up to 5 categories can be specified for a given product)
      * @param float|int $price (optional) Individual product price (supports integer and decimal prices)
      * @param int $quantity (optional) Product quantity. If not specified, will default to 1 in the Reports
-     * @throws Exception
+     * @throws \Exception
      */
     public function addEcommerceItem($sku, $name = '', $category = '', $price = 0.0, $quantity = 1)
     {
         if (empty($sku)) {
-            throw new Exception("You must specify a SKU for the Ecommerce item");
+            throw new \Exception("You must specify a SKU for the Ecommerce item");
         }
         $this->ecommerceItems[$sku] = array($sku, $name, $category, $price, $quantity);
     }
@@ -620,17 +622,17 @@ class Tx_Piwik_PiwikApi_PiwikTracker
      *
      * To enable bulk tracking, call enableBulkTracking().
      *
-     * @throws Exception
+     * @throws \Exception
      * @return string Response
      */
     public function doBulkTrack()
     {
         if (empty($this->token_auth)) {
-            throw new Exception("Token auth is required for bulk tracking.");
+            throw new \Exception("Token auth is required for bulk tracking.");
         }
 
         if (empty($this->storedTrackingActions)) {
-            throw new Exception("Error:  you must call the function doTrackPageView or doTrackGoal from this class, before calling this method doBulkTrack()");
+            throw new \Exception("Error:  you must call the function doTrackPageView or doTrackGoal from this class, before calling this method doBulkTrack()");
         }
 
         $data = array('requests' => $this->storedTrackingActions, 'token_auth' => $this->token_auth);
@@ -733,7 +735,7 @@ class Tx_Piwik_PiwikApi_PiwikTracker
     public function getUrlTrackEcommerceOrder($orderId, $grandTotal, $subTotal = 0.0, $tax = 0.0, $shipping = 0.0, $discount = 0.0)
     {
         if (empty($orderId)) {
-            throw new Exception("You must specifiy an orderId for the Ecommerce order");
+            throw new \Exception("You must specifiy an orderId for the Ecommerce order");
         }
         $url = $this->getUrlTrackEcommerce($grandTotal, $subTotal, $tax, $shipping, $discount);
         $url .= '&ec_id=' . urlencode($orderId);
@@ -750,7 +752,7 @@ class Tx_Piwik_PiwikApi_PiwikTracker
     protected function getUrlTrackEcommerce($grandTotal, $subTotal = 0.0, $tax = 0.0, $shipping = 0.0, $discount = 0.0)
     {
         if (!is_numeric($grandTotal)) {
-            throw new Exception("You must specifiy a grandTotal for the Ecommerce order (or Cart update)");
+            throw new \Exception("You must specifiy a grandTotal for the Ecommerce order (or Cart update)");
         }
 
         $url = $this->getRequest($this->idSite);
@@ -812,10 +814,10 @@ class Tx_Piwik_PiwikApi_PiwikTracker
     {
         $url = $this->getRequest($this->idSite);
         if(strlen($category) == 0) {
-            throw new Exception("You must specify an Event Category name (Music, Videos, Games...).");
+            throw new \Exception("You must specify an Event Category name (Music, Videos, Games...).");
         }
         if(strlen($action) == 0) {
-            throw new Exception("You must specify an Event action (click, view, add...).");
+            throw new \Exception("You must specify an Event action (click, view, add...).");
         }
 
         $url .= '&e_c=' . urlencode($category);
@@ -924,7 +926,7 @@ class Tx_Piwik_PiwikApi_PiwikTracker
      *
      * @see setTokenAuth()
      * @param string $visitorId 16 hexadecimal characters visitor ID, eg. "33c31e01394bdc63"
-     * @throws Exception
+     * @throws \Exception
      */
     public function setVisitorId($visitorId)
     {
@@ -932,7 +934,7 @@ class Tx_Piwik_PiwikApi_PiwikTracker
         if (strlen($visitorId) != self::LENGTH_VISITOR_ID
             || strspn($visitorId, $hexChars) !== strlen($visitorId)
         ) {
-            throw new Exception("setVisitorId() expects a "
+            throw new \Exception("setVisitorId() expects a "
                 . self::LENGTH_VISITOR_ID
                 . " characters hexadecimal string (containing only the following: "
                 . $hexChars
@@ -1132,12 +1134,12 @@ class Tx_Piwik_PiwikApi_PiwikTracker
      * from Piwik.
      *
      * @param int $timeout
-     * @throws Exception
+     * @throws \Exception
      */
     public function setRequestTimeout($timeout)
     {
         if (!is_int($timeout) || $timeout < 0) {
-            throw new Exception("Invalid value supplied for request timeout: $timeout");
+            throw new \Exception("Invalid value supplied for request timeout: $timeout");
         }
 
         $this->requestTimeout = $timeout;
@@ -1240,7 +1242,7 @@ class Tx_Piwik_PiwikApi_PiwikTracker
     protected function getBaseUrl()
     {
         if (empty(self::$URL)) {
-            throw new Exception('You must first set the Piwik Tracker URL by calling PiwikTracker::$URL = \'http://your-website.org/piwik/\';');
+            throw new \Exception('You must first set the Piwik Tracker URL by calling PiwikTracker::$URL = \'http://your-website.org/piwik/\';');
         }
         if (strpos(self::$URL, '/piwik.php') === false
             && strpos(self::$URL, '/proxy-piwik.php') === false

@@ -28,7 +28,6 @@
   "autoload": {
     "psr-4": {
       "KayStrobach\\Piwik\\": "Classes"
-    },
-    "classmap": ["Classes/PiwikApi/PiwikTracker.php", "Classes/UserFunc/Footer.php"]
+    }
   }
 }

@@ -1,4 +1,6 @@
 <?php
+namespace KayStrobach\Piwik\UserFunc;
+
 /***************************************************************
  *  Copyright notice
  *
@@ -22,6 +24,9 @@
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
+use KayStrobach\Piwik\PiwikApi\PiwikTracker;
+use TYPO3\CMS\Core\Service\MarkerBasedTemplateService;
+
 /**
  * Based on B-Net1 Piwik plugin implementation, old piwik plugin and piwik2a
  * Provides Interface to get the new piwiktrackingcode
@@ -32,15 +37,17 @@
  * @author Joerg Winter <winter@b-net1.de>
  * @author Kay Strobach <typo3@kay-strobach.de>
  */
-class tx_Piwik_UserFunc_Footer {
+class Footer {
 
-	/** @var \TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer */
+	/**
+	 * @var \TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer
+	 */
 	public $cObj;
 
 	/**
 	 * Piwik PHP Tracking Code for generating the tracking image
 	 *
-	 * @var Tx_Piwik_PiwikApi_PiwikTracker
+	 * @var \KayStrobach\Piwik\PiwikApi\PiwikTracker
 	 */
 	protected $piwikTracker;
 
@@ -417,7 +424,7 @@ class tx_Piwik_UserFunc_Footer {
 	 */
 	protected function initializePiwikTracker() {
 		$this->piwikTracker = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(
-			'Tx_Piwik_PiwikApi_PiwikTracker',
+			PiwikTracker::class,
 			$this->getPiwikIDSite(),
 			$this->piwikOptions['piwik_host']
 		);
