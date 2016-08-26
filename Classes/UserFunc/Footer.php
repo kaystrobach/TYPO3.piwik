@@ -59,6 +59,7 @@ class tx_Piwik_UserFunc_Footer {
 	 */
 	protected $useAsyncTrackingApi = FALSE;
 
+    protected $keepGroupNames;
 	/**
 	 * write piwik javascript right before </body> tag
 	 * JS Documentation on http://piwik.org/docs/javascript-tracking/
@@ -118,6 +119,7 @@ class tx_Piwik_UserFunc_Footer {
 		$trackingCode .= $this->getPiwikSetDownloadClasses();
 		$trackingCode .= $this->getPiwikSetLinkClasses();
 		$trackingCode .= $this->getPiwikCustomVariables();
+        $trackingCode .= $this->getPiwikCustomDimensions();
 
 		if (!$this->useAsyncTrackingApi) {
 			$trackingCode .= "\t\t" . 'piwikTracker.trackPageView();';
@@ -385,6 +387,60 @@ class tx_Piwik_UserFunc_Footer {
 
 		return $javaScript;
 	}
+
+    /**
+    * Generates javascript code for using custom dimensions and
+    * initializes custom dimensions in the piwikTracker API for image tracking.
+    * See http://piwik.org/docs/custom-dimensions/
+    *
+    * @return string piwikTracker javascript code for initializing custom dimensions
+    */
+    protected function getPiwikCustomDimensions() {
+
+        $javaScript = '';
+
+        if (!is_array($this->piwikOptions['customDimensions.'])) {
+            return $javaScript;
+        }
+
+        /** @var \TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer $cObject */
+        $cObject = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\Frontend\\ContentObject\\ContentObjectRenderer');
+
+        foreach ($this->piwikOptions['customDimensions.'] as $v) {
+            $dimId = $v['dimId'];
+            $dimVal = $cObject->stdWrap($v['dimVal'], $v['dimVal.']);
+            $nameUsergroup = $v['nameUsergroup'];
+
+            if (!is_int($dimId)) {
+                $dimId = intval($dimId);
+            }
+
+            if (!empty($nameUsergroup)) {
+                $array = array();
+                foreach (explode(',', $dimVal) as $v) {
+                    $array[$v] = $GLOBALS['TSFE']->fe_user->groupData['title'][$v];
+                }
+                $this->keepGroupNames = implode($array, ', ');
+            }
+
+            if ($dimVal == 'piwik_name_usergroup') {
+                $dimVal = $this->keepGroupNames;
+            }
+
+            $arguments = trim(json_encode(array($dimId, $dimVal)), "[]");
+
+            if ($this->useAsyncTrackingApi) {
+                $javaScript .= '_paq.push(["setCustomDimension", '.$arguments.']);' . PHP_EOL;
+            } else {
+                $javaScript .= 'piwikTracker.setCustomDimension('.$arguments.');' . PHP_EOL;
+            }
+
+            // For use in the noscript area.
+            $this->piwikTracker->setCustomDimension($dimId, $dimVal);
+        }
+
+        return $javaScript;
+    }
 
 	/**
 	 * Gets Piwik SiteID
