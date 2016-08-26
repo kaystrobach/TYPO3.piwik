@@ -167,6 +167,7 @@ class Tx_Piwik_PiwikApi_PiwikTracker
         $this->pageCustomVar = false;
         $this->eventCustomVar = false;
         $this->pageCustomDimension = false;
+        $this->userId = false;
         $this->customData = false;
         $this->forcedDatetime = false;
         $this->token_auth = false;
@@ -1299,6 +1300,7 @@ class Tx_Piwik_PiwikApi_PiwikTracker
             (!empty($this->pageCustomVar) ? '&cvar=' . urlencode(json_encode($this->pageCustomVar)) : '') .
             (!empty($this->eventCustomVar) ? '&e_cvar=' . urlencode(json_encode($this->eventCustomVar)) : '') .
             (!empty($this->pageCustomDimension) ? $this->getCustomDimension() : '') .
+            (!empty($this->userId) ? '&uid=' . urlencode($this->getUserid()) : '') .
             (!empty($this->generationTime) ? '&gt_ms=' . ((int)$this->generationTime) : '') .
 
             // URL parameters
@@ -1361,6 +1363,27 @@ class Tx_Piwik_PiwikApi_PiwikTracker
         }
 
         return $string;
+    }
+
+    /**
+     * Sets the User Id.
+     * See https://piwik.org/docs/user-id/
+     *
+     * @param * $id UserId value
+     */
+    public function setUserId($id)
+    {
+        $this->userId = $id;
+    }
+
+    /**
+     * Returns assigned User Id.
+     * See https://piwik.org/docs/user-id/
+     *
+     */
+    public function getUserId()
+    {
+        return $this->userId;
     }
 
 
