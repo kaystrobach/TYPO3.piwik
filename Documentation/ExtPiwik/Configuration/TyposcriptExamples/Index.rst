@@ -44,3 +44,14 @@ actionName hierarchy like a rootline navigation.
                    }
            }
 
+Custom User ID Examples
+^^^^^^^^^^^^^^^^^^^^^^^
+
+The User ID can be the Typo3 UID and/or the Username
+
+::
+
+      config.tx_piwik {
+                   setUserId.data = TSFE:fe_user|user|uid
+      }
+
