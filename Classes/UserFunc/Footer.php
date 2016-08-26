@@ -120,6 +120,7 @@ class tx_Piwik_UserFunc_Footer {
 		$trackingCode .= $this->getPiwikSetLinkClasses();
 		$trackingCode .= $this->getPiwikCustomVariables();
         $trackingCode .= $this->getPiwikCustomDimensions();
+        $trackingCode .= $this->getPiwiksetUserId();
 
 		if (!$this->useAsyncTrackingApi) {
 			$trackingCode .= "\t\t" . 'piwikTracker.trackPageView();';
@@ -440,6 +441,39 @@ class tx_Piwik_UserFunc_Footer {
         }
 
         return $javaScript;
+    }
+
+    /**
+    * Generates javascript code for using user id's and
+    * initializes user id's in the piwikTracker API for image tracking.
+    * See https://piwik.org/docs/user-id/
+    *
+    * @return string piwikTracker javascript code for initializing user id's
+    */
+    protected function getPiwiksetUserId() {
+
+        $javascript = '';
+
+        if (!is_array($this->piwikOptions['setUserId.'])) {
+            return $javaScript;
+        }
+
+        /** @var \TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer $cObject */
+        $cObject = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\Frontend\\ContentObject\\ContentObjectRenderer');
+
+        $arguments = $cObject->stdWrap($this->piwikOptions['setUserId'], $this->piwikOptions['setUserId.']);
+
+        if ($this->useAsyncTrackingApi) {
+            $javaScript .= '_paq.push(["setUserId", '.json_encode($arguments).']);' . PHP_EOL;
+        } else {
+            $javaScript .= 'piwikTracker.setUserId('.json_encode($arguments).');' . PHP_EOL;
+        }
+
+        // For use in the noscript area.
+        $this->piwikTracker->setUserId($arguments);
+
+        return $javaScript;
+
     }
 
 	/**
