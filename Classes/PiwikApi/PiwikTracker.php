@@ -166,6 +166,7 @@ class Tx_Piwik_PiwikApi_PiwikTracker
         $this->plugins = false;
         $this->pageCustomVar = false;
         $this->eventCustomVar = false;
+        $this->pageCustomDimension = false;
         $this->customData = false;
         $this->forcedDatetime = false;
         $this->token_auth = false;
@@ -1297,6 +1298,7 @@ class Tx_Piwik_PiwikApi_PiwikTracker
             (!empty($this->visitorCustomVar) ? '&_cvar=' . urlencode(json_encode($this->visitorCustomVar)) : '') .
             (!empty($this->pageCustomVar) ? '&cvar=' . urlencode(json_encode($this->pageCustomVar)) : '') .
             (!empty($this->eventCustomVar) ? '&e_cvar=' . urlencode(json_encode($this->eventCustomVar)) : '') .
+            (!empty($this->pageCustomDimension) ? $this->getCustomDimension() : '') .
             (!empty($this->generationTime) ? '&gt_ms=' . ((int)$this->generationTime) : '') .
 
             // URL parameters
@@ -1328,6 +1330,37 @@ class Tx_Piwik_PiwikApi_PiwikTracker
         $this->eventCustomVar = false;
 
         return $url;
+    }
+
+    /**
+     * Sets Visit Custom Dimension.
+     * See http://piwik.org/docs/custom-dimensions/
+     *
+     * @param int $id Custom dimension Id
+     * @param string $val Custom dimension value
+     */
+    public function setCustomDimension($id, $val)
+    {
+        if (!is_int($id)) {
+            throw new Exception("Parameter id to setCustomDimension should be an integer");
+        }
+        $this->pageCustomDimension[$id] = $val;
+    }
+
+    /**
+     * Returns a string of assigned Custom Dimensions.
+     * See http://piwik.org/docs/custom-dimensions/
+     *
+     */
+    public function getCustomDimension()
+    {
+        $string = '';
+
+        foreach ($this->pageCustomDimension as $k => $v) {
+            $string .= "&dimension".$k."=".urlencode($v);
+        }
+
+        return $string;
     }
 
 
