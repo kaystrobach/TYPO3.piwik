@@ -55,3 +55,34 @@ The User ID can be the Typo3 UID and/or the Username
                    setUserId.data = TSFE:fe_user|user|uid
       }
 
+Custom Dimension Examples
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+When having the group names of the current user put into the
+javascript the 'piwik_name_usergroup' dimension in typoscript
+MUST be after the 'nameUsergroup' dimension.
+
+::
+
+      config.tx_piwik {
+                   customDimensions {
+                           10 {
+                                   dimId = 1
+                                   dimVal.data = TSFE:fe_user|user|usergroup
+                                   nameUsergroup = 1
+                           }
+                           20 {
+                                   dimId = 2
+                                   dimVal = piwik_name_usergroup
+                           }
+                           30 {
+                                   dimId = 3
+                                   dimVal.data = TSFE:page|uid
+                           }
+                           40 {
+                                   dimId = 4
+                                   dimVal.data = TSFE:fe_user|user|username
+                           }
+                   }
+      }
+
