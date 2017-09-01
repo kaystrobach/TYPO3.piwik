@@ -118,8 +118,8 @@ class tx_Piwik_UserFunc_Footer {
 		$trackingCode .= $this->getPiwikSetDownloadClasses();
 		$trackingCode .= $this->getPiwikSetLinkClasses();
 		$trackingCode .= $this->getPiwikCustomVariables();
-        $trackingCode .= $this->getPiwikCustomDimensions();
-        $trackingCode .= $this->getPiwiksetUserId();
+		$trackingCode .= $this->getPiwikCustomDimensions();
+		$trackingCode .= $this->getPiwiksetUserId();
 
 		if (!$this->useAsyncTrackingApi) {
 			$trackingCode .= "\t\t" . 'piwikTracker.trackPageView();';
