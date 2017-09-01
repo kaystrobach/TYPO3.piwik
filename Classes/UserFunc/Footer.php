@@ -140,7 +140,8 @@ class Footer {
 		if (strlen($this->piwikOptions['trackGoal'])) {
 			$template = str_replace('###TRACKING_IMAGE_URL###', htmlentities($this->piwikTracker->getUrlTrackGoal($this->piwikOptions['trackGoal'])), $template);
 		} else {
-			$template = str_replace('###TRACKING_IMAGE_URL###', htmlentities($this->piwikTracker->getUrlTrackPageView()), $template);
+			$currentPageTitle = $this->getCurrentPageTitle();
+			$template = str_replace('###TRACKING_IMAGE_URL###', htmlentities($this->piwikTracker->getUrlTrackPageView($currentPageTitle)), $template);
 		}
 
 		if (isset($this->piwikOptions['includeJavaScript']) && !(bool)$this->piwikOptions['includeJavaScript']) {
@@ -158,6 +159,25 @@ class Footer {
 	 */
 	function is_backend() {
 		return false;
+	}
+
+	/**
+	 * Returns the page title set in the TSFE page renderer.
+	 *
+	 * @return string
+	 */
+	protected function getCurrentPageTitle() {
+		$tsfe = $this->getTypoScriptFrontendController();
+		if (!$tsfe) {
+			return '';
+		}
+
+		$pageRenderer = $tsfe->getPageRenderer();
+		if (!$pageRenderer) {
+			return '';
+		}
+
+		return $pageRenderer->getTitle();
 	}
 
 	/**
@@ -418,6 +438,13 @@ class Footer {
 	}
 
 	/**
+	 * @return \TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController
+	 */
+	protected function getTypoScriptFrontendController() {
+		return $GLOBALS['TSFE'];
+	}
+
+	/**
 	 * Creates a new instance of the piwik tracker and
 	 * initializes some variables by using the TYPO3 API
 	 *
@@ -435,5 +462,4 @@ class Footer {
 		$this->piwikTracker->setBrowserLanguage(\TYPO3\CMS\Core\Utility\GeneralUtility::getIndpEnv('HTTP_ACCEPT_LANGUAGE'));
 		$this->piwikTracker->setUserAgent(\TYPO3\CMS\Core\Utility\GeneralUtility::getIndpEnv('HTTP_USER_AGENT'));
 	}
-
 }
