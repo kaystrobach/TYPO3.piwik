@@ -59,7 +59,6 @@ class tx_Piwik_UserFunc_Footer {
 	 */
 	protected $useAsyncTrackingApi = FALSE;
 
-    protected $keepGroupNames;
 	/**
 	 * write piwik javascript right before </body> tag
 	 * JS Documentation on http://piwik.org/docs/javascript-tracking/
@@ -389,92 +388,72 @@ class tx_Piwik_UserFunc_Footer {
 		return $javaScript;
 	}
 
-    /**
-    * Generates javascript code for using custom dimensions and
-    * initializes custom dimensions in the piwikTracker API for image tracking.
-    * See http://piwik.org/docs/custom-dimensions/
-    *
-    * @return string piwikTracker javascript code for initializing custom dimensions
-    */
-    protected function getPiwikCustomDimensions() {
+	/**
+	 * Generates javascript code for using custom dimensions and
+	 * initializes custom dimensions in the piwikTracker API for image tracking.
+	 * See http://piwik.org/docs/custom-dimensions/
+	 *
+	 * @return string piwikTracker javascript code for initializing custom dimensions
+	 */
+	protected function getPiwikCustomDimensions() {
+		$javaScript = '';
 
-        $javaScript = '';
+		if (!is_array($this->piwikOptions['customDimensions.'])) {
+			return $javaScript;
+		}
 
-        if (!is_array($this->piwikOptions['customDimensions.'])) {
-            return $javaScript;
-        }
+		foreach ($this->piwikOptions['customDimensions.'] as $dimensionConfig) {
+			$dimId = (int)$dimensionConfig['dimId'];
+			if ($dimId < 1) {
+				continue;
+			}
 
-        /** @var \TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer $cObject */
-        $cObject = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\Frontend\\ContentObject\\ContentObjectRenderer');
+			$dimVal = trim($this->stdWrapConfigValue($dimensionConfig, 'dimVal'));
+			if ($dimVal === '') {
+				continue;
+			}
 
-        foreach ($this->piwikOptions['customDimensions.'] as $v) {
-            $dimId = $v['dimId'];
-            $dimVal = $cObject->stdWrap($v['dimVal'], $v['dimVal.']);
-            $nameUsergroup = $v['nameUsergroup'];
+			$arguments = trim(json_encode(array($dimId, $dimVal)), "[]");
 
-            if (!is_int($dimId)) {
-                $dimId = intval($dimId);
-            }
+			if ($this->useAsyncTrackingApi) {
+				$javaScript .= '_paq.push(["setCustomDimension", ' . $arguments . ']);' . PHP_EOL;
+			} else {
+				$javaScript .= 'piwikTracker.setCustomDimension(' . $arguments . ');' . PHP_EOL;
+			}
 
-            if (!empty($nameUsergroup)) {
-                $array = array();
-                foreach (explode(',', $dimVal) as $v) {
-                    $array[$v] = $GLOBALS['TSFE']->fe_user->groupData['title'][$v];
-                }
-                $this->keepGroupNames = implode($array, ', ');
-            }
+			// For use in the noscript area.
+			$this->piwikTracker->setCustomTrackingParameter('dimension' . $dimId, $dimVal);
+		}
 
-            if ($dimVal == 'piwik_name_usergroup') {
-                $dimVal = $this->keepGroupNames;
-            }
+		return $javaScript;
+	}
 
-            $arguments = trim(json_encode(array($dimId, $dimVal)), "[]");
+	 /**
+	 * Generates javascript code for using user id's and
+	 * initializes user id's in the piwikTracker API for image tracking.
+	 * See https://piwik.org/docs/user-id/
+	 *
+	 * @return string piwikTracker javascript code for initializing user id's
+	 */
+	protected function getPiwiksetUserId() {
+		$javaScript = '';
 
-            if ($this->useAsyncTrackingApi) {
-                $javaScript .= '_paq.push(["setCustomDimension", '.$arguments.']);' . PHP_EOL;
-            } else {
-                $javaScript .= 'piwikTracker.setCustomDimension('.$arguments.');' . PHP_EOL;
-            }
+		$userId = trim($this->stdWrapConfigValue($this->piwikOptions, 'setUserId'));
+		if ($userId === '') {
+			return $javaScript;
+		}
 
-            // For use in the noscript area.
-            $this->piwikTracker->setCustomDimension($dimId, $dimVal);
-        }
+		if ($this->useAsyncTrackingApi) {
+			$javaScript .= '_paq.push(["setUserId", ' . json_encode($userId) . ']);' . PHP_EOL;
+		} else {
+			$javaScript .= 'piwikTracker.setUserId(' . json_encode($userId) . ');' . PHP_EOL;
+		}
 
-        return $javaScript;
-    }
+		// For use in the noscript area.
+		$this->piwikTracker->setUserId($userId);
 
-    /**
-    * Generates javascript code for using user id's and
-    * initializes user id's in the piwikTracker API for image tracking.
-    * See https://piwik.org/docs/user-id/
-    *
-    * @return string piwikTracker javascript code for initializing user id's
-    */
-    protected function getPiwiksetUserId() {
-
-        $javascript = '';
-
-        if (!is_array($this->piwikOptions['setUserId.'])) {
-            return $javaScript;
-        }
-
-        /** @var \TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer $cObject */
-        $cObject = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\Frontend\\ContentObject\\ContentObjectRenderer');
-
-        $arguments = $cObject->stdWrap($this->piwikOptions['setUserId'], $this->piwikOptions['setUserId.']);
-
-        if ($this->useAsyncTrackingApi) {
-            $javaScript .= '_paq.push(["setUserId", '.json_encode($arguments).']);' . PHP_EOL;
-        } else {
-            $javaScript .= 'piwikTracker.setUserId('.json_encode($arguments).');' . PHP_EOL;
-        }
-
-        // For use in the noscript area.
-        $this->piwikTracker->setUserId($arguments);
-
-        return $javaScript;
-
-    }
+		return $javaScript;
+	}
 
 	/**
 	 * Gets Piwik SiteID
@@ -518,6 +497,22 @@ class tx_Piwik_UserFunc_Footer {
 		$this->piwikTracker->setUserAgent(\TYPO3\CMS\Core\Utility\GeneralUtility::getIndpEnv('HTTP_USER_AGENT'));
 	}
 
+	/**
+	 * Checks if a stdWrap configuration exists for the given config key
+	 * in the given TypoScript configuration array.
+	 *
+	 * @param array $config
+	 * @param string $configKey
+	 * @return string
+	 */
+	protected function stdWrapConfigValue(array $config, $configKey) {
+		$configValue = isset($config[$configKey]) ? $config[$configKey] : '';
+		$stdWrapKey = $configKey . '.';
+		if (!empty($config[$stdWrapKey]) && is_array($config[$stdWrapKey])) {
+			$configValue = $this->cObj->stdWrap($configValue, $config[$stdWrapKey]);
+		}
+		return $configValue;
+	}
 }
 
 if (defined("TYPO3_MODE") && $TYPO3_CONF_VARS[TYPO3_MODE]["XCLASS"]["ext/piwik/class.tx_piwik.php"]) {

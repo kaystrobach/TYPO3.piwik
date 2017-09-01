@@ -66,14 +66,23 @@ MUST be after the 'nameUsergroup' dimension.
 
       config.tx_piwik {
                    customDimensions {
+                           // The user group UID as comma seperated list.
                            10 {
                                    dimId = 1
                                    dimVal.data = TSFE:fe_user|user|usergroup
-                                   nameUsergroup = 1
                            }
+                           // The user group titles as comma seperated list.
                            20 {
                                    dimId = 2
-                                   dimVal = piwik_name_usergroup
+                                   dimVal.data = TSFE:fe_user|user|usergroup
+                                   dimVal.split {
+                                           token = ,
+                                           cObjNum = 1 || 2
+                                           1.data = TSFE:fe_user|groupData|title|{current}
+                                           1.data.insertData = 1
+                                          2 < .1
+                                           2.noTrimWrap = |, ||
+                                   }
                            }
                            30 {
                                    dimId = 3
