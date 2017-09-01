@@ -135,7 +135,8 @@ class tx_Piwik_UserFunc_Footer {
 		if (strlen($this->piwikOptions['trackGoal'])) {
 			$template = str_replace('###TRACKING_IMAGE_URL###', htmlentities($this->piwikTracker->getUrlTrackGoal($this->piwikOptions['trackGoal'])), $template);
 		} else {
-			$template = str_replace('###TRACKING_IMAGE_URL###', htmlentities($this->piwikTracker->getUrlTrackPageView()), $template);
+			$currentPageTitle = $this->getCurrentPageTitle();
+			$template = str_replace('###TRACKING_IMAGE_URL###', htmlentities($this->piwikTracker->getUrlTrackPageView($currentPageTitle)), $template);
 		}
 
 		if (isset($this->piwikOptions['includeJavaScript']) && !(bool)$this->piwikOptions['includeJavaScript']) {
@@ -152,6 +153,25 @@ class tx_Piwik_UserFunc_Footer {
 	 */
 	function is_backend() {
 		return false;
+	}
+
+	/**
+	 * Returns the page title set in the TSFE page renderer.
+	 *
+	 * @return string
+	 */
+	protected function getCurrentPageTitle() {
+		$tsfe = $this->getTypoScriptFrontendController();
+		if (!$tsfe) {
+			return '';
+		}
+
+		$pageRenderer = $tsfe->getPageRenderer();
+		if (!$pageRenderer) {
+			return '';
+		}
+
+		return $pageRenderer->getTitle();
 	}
 
 	/**
@@ -476,6 +496,13 @@ class tx_Piwik_UserFunc_Footer {
 			$scheme = 'http://';
 		}
 		return $scheme . $this->piwikOptions['piwik_host'];
+	}
+
+	/**
+	 * @return \TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController
+	 */
+	protected function getTypoScriptFrontendController() {
+		return $GLOBALS['TSFE'];
 	}
 
 	/**
