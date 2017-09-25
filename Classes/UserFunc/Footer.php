@@ -25,7 +25,9 @@ namespace KayStrobach\Piwik\UserFunc;
  ***************************************************************/
 
 use KayStrobach\Piwik\PiwikApi\PiwikTracker;
+use TYPO3\CMS\Core\Page\PageRenderer;
 use TYPO3\CMS\Core\Service\MarkerBasedTemplateService;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
  * Based on B-Net1 Piwik plugin implementation, old piwik plugin and piwik2a
@@ -169,16 +171,7 @@ class Footer {
 	 * @return string
 	 */
 	protected function getCurrentPageTitle() {
-		$tsfe = $this->getTypoScriptFrontendController();
-		if (!$tsfe) {
-			return '';
-		}
-
-		$pageRenderer = $tsfe->getPageRenderer();
-		if (!$pageRenderer) {
-			return '';
-		}
-
+		$pageRenderer = GeneralUtility::makeInstance(PageRenderer::class);
 		return $pageRenderer->getTitle();
 	}
 
