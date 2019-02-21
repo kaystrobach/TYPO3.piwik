@@ -129,6 +129,7 @@ class Footer {
 		$trackingCode .= $this->getPiwikCustomVariables();
 		$trackingCode .= $this->getPiwikCustomDimensions();
 		$trackingCode .= $this->getPiwiksetUserId();
+		$trackingCode .= $this->getAdditionalTrackers();
 
 		if (!$this->useAsyncTrackingApi) {
 			$trackingCode .= "\t\t" . 'piwikTracker.trackPageView();';
@@ -141,12 +142,7 @@ class Footer {
 		$template = str_replace('###IDSITE###', $conf['piwik_idsite'], $template);
 		$template = str_replace('###BEUSER###', $beUserLogin, $template);
 
-		if (strlen($this->piwikOptions['trackGoal'])) {
-			$template = str_replace('###TRACKING_IMAGE_URL###', htmlentities($this->piwikTracker->getUrlTrackGoal($this->piwikOptions['trackGoal'])), $template);
-		} else {
-			$currentPageTitle = $this->getCurrentPageTitle();
-			$template = str_replace('###TRACKING_IMAGE_URL###', htmlentities($this->piwikTracker->getUrlTrackPageView($currentPageTitle)), $template);
-		}
+		$template = str_replace('###TRACKING_IMAGES###', $this->buildTrackingImages(), $template);
 
 		if (isset($this->piwikOptions['includeJavaScript']) && !(bool)$this->piwikOptions['includeJavaScript']) {
 			$templateService = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(MarkerBasedTemplateService::class);
@@ -163,6 +159,65 @@ class Footer {
 	 */
 	function is_backend() {
 		return false;
+	}
+
+	/**
+	 * @return string
+	 */
+	protected function buildTrackingImages()
+	{
+		$trackingImages = $this->buildTrackingImageTag($this->piwikTracker);
+
+		if (empty($this->piwikOptions['additionalTrackers.']) || !is_array($this->piwikOptions['additionalTrackers.'])) {
+			return $trackingImages;
+		}
+
+		foreach ($this->piwikOptions['additionalTrackers.'] as $trackerConfig) {
+			$addionalTrackerUrl = $trackerConfig['piwik_host'];
+			$addionalTrackerSiteId = (int)$trackerConfig['piwik_idsite'];
+			PiwikTracker::$URL = $addionalTrackerUrl;
+			$this->piwikTracker->setIdSite($addionalTrackerSiteId);
+			$trackingImages .= $this->buildTrackingImageTag($this->piwikTracker);
+		}
+
+		return $trackingImages;
+	}
+
+	/**
+	 * @param PiwikTracker $piwikTracker
+	 * @return string
+	 */
+	protected function buildTrackingImageTag(PiwikTracker $piwikTracker)
+	{
+		if (strlen($this->piwikOptions['trackGoal'])) {
+			$imageSrc = $piwikTracker->getUrlTrackGoal($this->piwikOptions['trackGoal']);
+		} else {
+			$currentPageTitle = $this->getCurrentPageTitle();
+			$imageSrc = $piwikTracker->getUrlTrackPageView($currentPageTitle);
+		}
+
+		return sprintf('<img src="%s" style="border:0" alt=""/>', htmlspecialchars($imageSrc)) . PHP_EOL;
+	}
+
+	protected function getAdditionalTrackers()
+	{
+		$additionalTrackerCode = '';
+		if (empty($this->piwikOptions['additionalTrackers.']) || !is_array($this->piwikOptions['additionalTrackers.'])) {
+			return $additionalTrackerCode;
+		}
+
+		foreach ($this->piwikOptions['additionalTrackers.'] as $trackerConfig) {
+			$addionalTrackerUrl = $trackerConfig['piwik_host'] . 'piwik.php';
+			$addionalTrackerSiteId = (int)$trackerConfig['piwik_idsite'];
+			$pushParameters = [
+				'addTracker',
+				$addionalTrackerUrl,
+				$addionalTrackerSiteId,
+			];
+			$additionalTrackerCode .= '_paq.push(' . json_encode($pushParameters, JSON_UNESCAPED_SLASHES) . ');' . PHP_EOL;
+		}
+
+		return $additionalTrackerCode;
 	}
 
 	/**
