@@ -1,4 +1,8 @@
 <?php
+/** @noinspection PhpMissingStrictTypesDeclarationInspection */
+/** @noinspection PhpUnnecessaryFullyQualifiedNameInspection */
+/** @noinspection PhpFullyQualifiedNameUsageInspection */
+
 namespace KayStrobach\Piwik\UserFunc;
 
 /***************************************************************
