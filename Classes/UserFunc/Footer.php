@@ -210,7 +210,7 @@ class Footer {
 		}
 
 		foreach ($this->piwikOptions['additionalTrackers.'] as $trackerConfig) {
-			$addionalTrackerUrl = $trackerConfig['piwik_host'] . 'piwik.php';
+			$addionalTrackerUrl = $trackerConfig['piwik_host'] . 'matomo.php';
 			$addionalTrackerSiteId = (int)$trackerConfig['piwik_idsite'];
 			$pushParameters = [
 				'addTracker',
