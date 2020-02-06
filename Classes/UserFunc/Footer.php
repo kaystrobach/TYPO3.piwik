@@ -24,7 +24,7 @@ namespace KayStrobach\Piwik\UserFunc;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
-use KayStrobach\Piwik\PiwikApi\PiwikTracker;
+use KayStrobach\Piwik\PiwikApi\MatomoTracker;
 use TYPO3\CMS\Core\Page\PageRenderer;
 use TYPO3\CMS\Core\Service\MarkerBasedTemplateService;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -49,9 +49,9 @@ class Footer {
 	/**
 	 * Piwik PHP Tracking Code for generating the tracking image
 	 *
-	 * @var \KayStrobach\Piwik\PiwikApi\PiwikTracker
+	 * @var \KayStrobach\Piwik\PiwikApi\MatomoTracker
 	 */
-	protected $piwikTracker;
+	protected $matomoTracker;
 
 	/**
 	 * The merged configuration from config.tx_piwik and the local
@@ -113,7 +113,7 @@ class Footer {
 		//make options accessable in the whole class
 		$this->piwikOptions = $conf;
 
-		$this->initializePiwikTracker();
+		$this->initializeMatomoTracker();
 
 		//build trackingCode
 		$trackingCode .= $this->getPiwikEnableLinkTracking();
@@ -166,7 +166,7 @@ class Footer {
 	 */
 	protected function buildTrackingImages()
 	{
-		$trackingImages = $this->buildTrackingImageTag($this->piwikTracker);
+		$trackingImages = $this->buildTrackingImageTag($this->matomoTracker);
 
 		if (empty($this->piwikOptions['additionalTrackers.']) || !is_array($this->piwikOptions['additionalTrackers.'])) {
 			return $trackingImages;
@@ -175,25 +175,25 @@ class Footer {
 		foreach ($this->piwikOptions['additionalTrackers.'] as $trackerConfig) {
 			$addionalTrackerUrl = $trackerConfig['piwik_host'];
 			$addionalTrackerSiteId = (int)$trackerConfig['piwik_idsite'];
-			PiwikTracker::$URL = $addionalTrackerUrl;
-			$this->piwikTracker->setIdSite($addionalTrackerSiteId);
-			$trackingImages .= $this->buildTrackingImageTag($this->piwikTracker);
+			MatomoTracker::$URL = $addionalTrackerUrl;
+			$this->matomoTracker->setIdSite($addionalTrackerSiteId);
+			$trackingImages .= $this->buildTrackingImageTag($this->matomoTracker);
 		}
 
 		return $trackingImages;
 	}
 
 	/**
-	 * @param PiwikTracker $piwikTracker
+	 * @param MatomoTracker $matomoTracker
 	 * @return string
 	 */
-	protected function buildTrackingImageTag(PiwikTracker $piwikTracker)
+	protected function buildTrackingImageTag(MatomoTracker $matomoTracker)
 	{
 		if (strlen($this->piwikOptions['trackGoal'])) {
-			$imageSrc = $piwikTracker->getUrlTrackGoal($this->piwikOptions['trackGoal']);
+			$imageSrc = $matomoTracker->getUrlTrackGoal($this->piwikOptions['trackGoal']);
 		} else {
 			$currentPageTitle = $this->getCurrentPageTitle();
-			$imageSrc = $piwikTracker->getUrlTrackPageView($currentPageTitle);
+			$imageSrc = $matomoTracker->getUrlTrackPageView($currentPageTitle);
 		}
 
 		return sprintf('<img src="%s" style="border:0" alt=""/>', htmlspecialchars($imageSrc)) . PHP_EOL;
@@ -456,7 +456,7 @@ class Footer {
 			}
 
 			// For use in the noscript area.
-			$this->piwikTracker->setCustomVariable($i, $name, $value, $scope);
+			$this->matomoTracker->setCustomVariable($i, $name, $value, $scope);
 
 			$i++;
 		}
@@ -498,7 +498,7 @@ class Footer {
 			}
 
 			// For use in the noscript area.
-			$this->piwikTracker->setCustomTrackingParameter('dimension' . $dimId, $dimVal);
+			$this->matomoTracker->setCustomTrackingParameter('dimension' . $dimId, $dimVal);
 		}
 
 		return $javaScript;
@@ -526,7 +526,7 @@ class Footer {
 		}
 
 		// For use in the noscript area.
-		$this->piwikTracker->setUserId($userId);
+		$this->matomoTracker->setUserId($userId);
 
 		return $javaScript;
 	}
@@ -567,17 +567,17 @@ class Footer {
 	 *
 	 * @return void
 	 */
-	protected function initializePiwikTracker() {
-		$this->piwikTracker = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(
-			PiwikTracker::class,
+	protected function initializeMatomoTracker() {
+		$this->matomoTracker = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(
+			MatomoTracker::class,
 			$this->getPiwikIDSite(),
 			$this->piwikOptions['piwik_host']
 		);
-		$this->piwikTracker->setUrlReferrer(\TYPO3\CMS\Core\Utility\GeneralUtility::getIndpEnv('HTTP_REFERER'));
-		$this->piwikTracker->setUrl(\TYPO3\CMS\Core\Utility\GeneralUtility::getIndpEnv('TYPO3_REQUEST_URL'));
-		$this->piwikTracker->setIp(\TYPO3\CMS\Core\Utility\GeneralUtility::getIndpEnv('REMOTE_ADDR'));
-		$this->piwikTracker->setBrowserLanguage(\TYPO3\CMS\Core\Utility\GeneralUtility::getIndpEnv('HTTP_ACCEPT_LANGUAGE'));
-		$this->piwikTracker->setUserAgent(\TYPO3\CMS\Core\Utility\GeneralUtility::getIndpEnv('HTTP_USER_AGENT'));
+		$this->matomoTracker->setUrlReferrer(\TYPO3\CMS\Core\Utility\GeneralUtility::getIndpEnv('HTTP_REFERER'));
+		$this->matomoTracker->setUrl(\TYPO3\CMS\Core\Utility\GeneralUtility::getIndpEnv('TYPO3_REQUEST_URL'));
+		$this->matomoTracker->setIp(\TYPO3\CMS\Core\Utility\GeneralUtility::getIndpEnv('REMOTE_ADDR'));
+		$this->matomoTracker->setBrowserLanguage(\TYPO3\CMS\Core\Utility\GeneralUtility::getIndpEnv('HTTP_ACCEPT_LANGUAGE'));
+		$this->matomoTracker->setUserAgent(\TYPO3\CMS\Core\Utility\GeneralUtility::getIndpEnv('HTTP_USER_AGENT'));
 	}
 
 	/**
