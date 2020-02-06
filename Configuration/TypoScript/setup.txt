@@ -1,23 +1,21 @@
-
 config.tx_piwik {
-  	############################################################################
-	# location of piwik
-	  	piwik_host       = {$config.tx_piwik.piwik_host}
-  	############################################################################
-	# idsite inside piwik
-		piwik_idsite     = {$config.tx_piwik.piwik_idsite}
-	############################################################################
-	# track beusers or not
-		trackBackendUsers = {$config.tx_piwik.trackBackendUsers}
-	############################################################################
-	# if TRUE the asynchronous JavaScript API will be used
-		useAsyncTrackingApi = {$config.tx_piwik.useAsyncTrackingApi}
+  // Location of piwik
+  piwik_host = {$config.tx_piwik.piwik_host}
+
+  // The idsite inside piwik
+  piwik_idsite = {$config.tx_piwik.piwik_idsite}
+
+  // Track beusers or not
+  trackBackendUsers = {$config.tx_piwik.trackBackendUsers}
+
+  // If TRUE the asynchronous JavaScript API will be used
+  useAsyncTrackingApi = {$config.tx_piwik.useAsyncTrackingApi}
 }
 
 page.footerData {
-    854536 = COA
-    854536 {
-        20 = USER_INT
-        20.userFunc = KayStrobach\Piwik\UserFunc\Footer->contentPostProc_output
-    }
+  854536 = COA
+  854536 {
+    20 = USER_INT
+    20.userFunc = KayStrobach\Piwik\UserFunc\Footer->contentPostProc_output
+  }
 }
