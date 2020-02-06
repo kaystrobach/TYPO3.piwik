@@ -180,7 +180,7 @@ class Footer {
 		}
 
 		foreach ($this->piwikOptions['additionalTrackers.'] as $trackerConfig) {
-			$addionalTrackerUrl = $trackerConfig['piwik_host'];
+			$addionalTrackerUrl = rtrim($trackerConfig['piwik_host'], '/');
 			$addionalTrackerSiteId = (int)$trackerConfig['piwik_idsite'];
 			MatomoTracker::$URL = $addionalTrackerUrl;
 			$this->matomoTracker->setIdSite($addionalTrackerSiteId);
@@ -578,7 +578,7 @@ class Footer {
 		$this->matomoTracker = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(
 			MatomoTracker::class,
 			$this->getPiwikIDSite(),
-			$this->piwikOptions['piwik_host']
+			rtrim($this->piwikOptions['piwik_host'], '/')
 		);
 		$this->matomoTracker->setUrlReferrer(\TYPO3\CMS\Core\Utility\GeneralUtility::getIndpEnv('HTTP_REFERER'));
 		$this->matomoTracker->setUrl(\TYPO3\CMS\Core\Utility\GeneralUtility::getIndpEnv('TYPO3_REQUEST_URL'));
