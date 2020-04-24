@@ -1,15 +1,15 @@
 <!-- Piwik -->
 <!-- ###JAVASCRIPT_INCLUDE### begin -->
-<script type="text/javascript" src="###HOST###piwik.js"></script>
+<script type="text/javascript" src="###HOST###matomo.js"></script>
 <!-- ###JAVASCRIPT_INCLUDE### end -->
 <script type="text/javascript">
 	/* <![CDATA[ */
 		try {
-			var piwikTracker=Piwik.getTracker("###HOST###piwik.php",###IDSITE###);
+			var piwikTracker=Piwik.getTracker("###HOST###matomo.php",###IDSITE###);
 			###TRACKEROPTIONS###
 		} catch(err) {}
 
 	/* ]]> */
 </script>
-<noscript><p><img src="###TRACKING_IMAGE_URL###" style="border:0" alt=""/></p></noscript>
+<noscript><p>###TRACKING_IMAGES###</p></noscript>
 <!-- /Piwik -->

@@ -5,7 +5,7 @@
 			var _paq = _paq || [];
 			(function() {
 				###TRACKEROPTIONS###
-				_paq.push(["setTrackerUrl", "###HOST###piwik.php"]);
+				_paq.push(["setTrackerUrl", "###HOST###matomo.php"]);
 				_paq.push(["setSiteId", "###IDSITE###"]);
 				_paq.push(["trackPageView"]);
 				var d = document;
@@ -14,12 +14,12 @@
 				g.type = "text/javascript";
 				g.defer = true;
 				g.async = true;
-				g.src = "###HOST###piwik.js";
+				g.src = "###HOST###matomo.js";
 				s.parentNode.insertBefore(g, s);
 			})();
 		} catch(err) {}
 
 	/* ]]> */
 </script>
-<noscript><p><img src="###TRACKING_IMAGE_URL###" style="border:0" alt=""/></p></noscript>
+<noscript><p>###TRACKING_IMAGES###</p></noscript>
 <!-- /Piwik -->
